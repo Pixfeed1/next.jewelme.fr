@@ -1,7 +1,7 @@
 'use client';
 import { trackAddToCart, trackRemoveFromCart } from './gtag';
 import { decodeHtmlEntities } from './text-utils';
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef, ReactNode } from 'react';
 
 export interface CartItem {
   id_product: number;
@@ -17,6 +17,8 @@ export interface CartItem {
   link_rewrite: string;
   image_id: number | null;
   in_stock?: boolean;
+  /** stock disponible (rempli par /api/cart*) pour borner la quantité */
+  quantity_available?: number;
 }
 
 export interface CartTotals {
@@ -96,6 +98,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState('');
   const [panelOpen, setPanelOpen] = useState(false);
 
+  // Miroir du panier courant pour pouvoir restaurer l'état précédent
+  // (évite que la ligne disparaisse si Presta refuse une qty > stock).
+  const cartRef = useRef<CartState | null>(cart);
+  useEffect(() => { cartRef.current = cart; }, [cart]);
+
   const refresh = useCallback(async () => {
     const token = getOrCreateToken();
     if (!token) return;
@@ -146,6 +153,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const updateItem = useCallback(async (id_product: number, qty: number, id_product_attribute = 0): Promise<boolean> => {
     const token = getOrCreateToken();
 
+    // Snapshot avant modif (pour restaurer si le serveur refuse une hausse de qty)
+    const prevCart = cartRef.current;
+    const prevItem = prevCart?.items.find(
+      (it) => it.id_product === id_product && it.id_product_attribute === id_product_attribute
+    );
+    const isIncrease = !!prevItem && qty > prevItem.quantity;
+
     // 1. OPTIMISTIC : update UI immediately
     setCart((prev) => {
       if (!prev) return prev;
@@ -191,7 +205,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setCart(data); // remplace par les vrais totaux serveur (TVA, etc.)
         return true;
       }
-      // En cas d'erreur, on refait un refresh pour resynchroniser
+      // Échec sur une HAUSSE de quantité (stock insuffisant) : on NE supprime pas
+      // la ligne — on restaure l'état précédent du panier tel quel.
+      if (isIncrease && prevCart) {
+        setCart(prevCart);
+        setError(data.error || 'Stock maximum atteint');
+        return false;
+      }
+      // Autres cas : refresh pour resynchroniser sur la vérité serveur
       const refreshRes = await fetch(`/api/cart?token=${encodeURIComponent(token)}`);
       const refreshData = await refreshRes.json();
       if (refreshRes.ok) setCart(refreshData);

@@ -116,6 +116,35 @@ async function fetchStocksForProducts(productIds: number[]): Promise<Record<numb
   }
 }
 
+/**
+ * Stock disponible par ligne panier, en tenant compte des déclinaisons.
+ * Retourne une map keyée `${id_product}-${id_product_attribute}` ainsi que
+ * `${id_product}-0` (stock global) pour fallback.
+ */
+export async function fetchStockAvailability(
+  items: Array<{ id_product: number; id_product_attribute?: number }>
+): Promise<Record<string, number>> {
+  const ids = Array.from(new Set(items.map((i) => i.id_product).filter((n) => n > 0)));
+  if (ids.length === 0) return {};
+  const url = `${API_URL}/stock_availables?ws_key=${API_KEY}&output_format=JSON&display=full&filter[id_product]=[${ids.join('|')}]&limit=${ids.length * 10}`;
+  const map: Record<string, number> = {};
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return {};
+    const data = await res.json();
+    for (const sa of (data.stock_availables || []) as Array<Record<string, unknown>>) {
+      const pid = parseInt(String(sa.id_product), 10);
+      const attr = parseInt(String(sa.id_product_attribute ?? '0'), 10);
+      const qty = parseInt(String(sa.quantity ?? '0'), 10);
+      if (pid > 0) map[`${pid}-${attr}`] = qty;
+    }
+    return map;
+  } catch (err) {
+    console.error('[Presta] fetchStockAvailability error:', err);
+    return {};
+  }
+}
+
 function normalizeProduct(raw: Record<string, unknown>, taxRates: { default_rate: number; rates: Record<string, number> } = { default_rate: 20, rates: {} }): PrestaProduct {
   const idImg = raw.id_default_image;
   const parsedImg = idImg ? parseInt(String(idImg), 10) : NaN;
