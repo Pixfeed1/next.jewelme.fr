@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { usePlayer } from '@/lib/player-context';
+import { useT } from '@/lib/i18n';
 import type { Track } from '@/lib/player-context';
 
 interface Sample {
@@ -23,6 +24,7 @@ export default function ProductSamplePlaylist({ productId, productName, productL
   const [samples, setSamples] = useState<Sample[]>([]);
   const [loading, setLoading] = useState(true);
   const { state, loadPlaylist, togglePlay } = usePlayer();
+  const t = useT();
 
   useEffect(() => {
     fetch(`/api/samples/${productId}`)
@@ -86,14 +88,14 @@ export default function ProductSamplePlaylist({ productId, productName, productL
           display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 20,
           transition: 'background 0.2s',
         }}
-        aria-label={isAnyPlaying ? 'Pause' : 'Écouter'}
+        aria-label={isAnyPlaying ? 'Pause' : t('listen')}
       >
         {isAnyPlaying ? (
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14"/><rect x="14" y="5" width="4" height="14"/></svg>
         ) : (
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
         )}
-        {isAnyPlaying ? 'Pause' : 'Écouter'}
+        {isAnyPlaying ? 'Pause' : t('listen')}
       </button>) : null}
 
       {showList ? (<ul style={{ listStyle: 'none', padding: 0, margin: 0, background: 'var(--or-bg-soft, #f5f5f5)', borderRadius: 6 }}>

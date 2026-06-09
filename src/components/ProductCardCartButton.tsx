@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useCart } from '@/lib/cart-context';
+import { useT } from '@/lib/i18n';
 import { trackAddToCart } from '@/lib/gtag';
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 export default function ProductCardCartButton({ idProduct, name, price, quantity = 1 }: Props) {
   const outOfStock = quantity <= 0;
   const { addItem } = useCart();
+  const t = useT();
   const [pending, setPending] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -38,8 +40,8 @@ export default function ProductCardCartButton({ idProduct, name, price, quantity
       className="product-card-cart-btn"
       onClick={handleClick}
       disabled={pending || outOfStock}
-      aria-label={outOfStock ? 'Indisponible' : 'Ajouter au panier'}
-      title={outOfStock ? 'Indisponible' : 'Ajouter au panier'}
+      aria-label={outOfStock ? t('out_of_stock') : t('add_to_cart')}
+      title={outOfStock ? t('out_of_stock') : t('add_to_cart')}
       style={{
         width: 42, height: 42,
         color: '#fff',

@@ -102,7 +102,7 @@ export default function CartPage() {
                       <div style={{ display: 'flex', alignItems: 'center' }}>
                         <button onClick={() => {
                           if (item.quantity <= 1) {
-                            if (window.confirm('Retirer ce produit du panier ?')) {
+                            if (window.confirm(t('remove_product_confirm'))) {
                               updateItem(item.id_product, 0, item.id_product_attribute);
                             }
                           } else {
@@ -179,17 +179,21 @@ export default function CartPage() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
-              <Link href={localeHref('/checkout', locale)}
-                className="btn-commander" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 32px', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', minWidth: 280, justifyContent: 'center' }}>
-                {t('order').toUpperCase()} <span style={{ fontSize: 16, lineHeight: 1 }}>▸</span>
-              </Link>
+              {/* 1. Connexion (client existant) — outline principal */}
               <Link href={`${localeHref('/connexion', locale)}?redirect=${encodeURIComponent(localeHref('/checkout', locale))}`}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 28px', color: 'var(--or-text)', background: '#f0f0f0', textDecoration: 'none', fontSize: 13, fontWeight: 600, border: '1px solid #ddd', borderRadius: 4, minWidth: 280, justifyContent: 'center' }}>
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px 28px', color: '#3f6e51', background: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', border: '2px solid #3f6e51', borderRadius: 4, minWidth: 280 }}>
                 {locale === 'en' ? 'I already have an account' : 'J\'ai déjà un compte'}
               </Link>
-              <p style={{ fontSize: 12, color: '#888', textAlign: 'center', margin: '4px 0 0' }}>
-                {locale === 'en' ? 'Or continue as guest with the button above' : 'Ou continuez en invité avec le bouton ci-dessus'}
-              </p>
+              {/* 2. Création de compte — outline secondaire */}
+              <Link href={`${localeHref('/inscription', locale)}?redirect=${encodeURIComponent(localeHref('/checkout', locale))}`}
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 28px', color: 'var(--or-text)', background: '#f0f0f0', textDecoration: 'none', fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', border: '1px solid #ddd', borderRadius: 4, minWidth: 280 }}>
+                {locale === 'en' ? 'Create an account' : 'Créer un compte'}
+              </Link>
+              {/* 3. Commander en tant qu'invité — action principale (green) */}
+              <Link href={localeHref('/checkout', locale)}
+                className="btn-commander" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 32px', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', minWidth: 280, justifyContent: 'center' }}>
+                {locale === 'en' ? 'Checkout as guest' : 'Commander en tant qu\'invité'} <span style={{ fontSize: 16, lineHeight: 1 }}>▸</span>
+              </Link>
             </div>
           </div>
         </>

@@ -1,10 +1,12 @@
 'use client';
 import { useState } from 'react';
+import { useT } from '@/lib/i18n';
 interface Props {
   idProduct: number;
   productName: string;
 }
 export default function MailAlertForm({ idProduct, productName }: Props) {
+  const t = useT();
   const [email, setEmail] = useState('');
   const [pending, setPending] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
@@ -59,7 +61,7 @@ export default function MailAlertForm({ idProduct, productName }: Props) {
           className="btn-mailalert"
           style={{ height: 40, padding: "0 20px", background: "var(--or-dark)", color: "#fff", border: 0, borderRadius: 4, fontSize: 13, fontWeight: 600, transition: "background 0.2s ease", cursor: pending ? 'wait' : 'pointer', opacity: pending || !email ? 0.6 : 1 }}
         >
-          {pending ? 'Envoi…' : 'Me prévenir'}
+          {pending ? t('sending') : t('notify_me')}
         </button>
       </form>
       {feedback && (
