@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { PrestaProduct, getProductImageUrl } from '@/lib/presta';
-import { productUrl } from '@/lib/urls';
+import { productUrl } from '@/lib/url-builder';
 import { useLocale } from '@/lib/locale-context';
 import ProductPlayButton from './ProductPlayButton';
 import ProductCardCartButton from './ProductCardCartButton';
@@ -13,7 +13,7 @@ export default function ProductTableRow({ product }: Props) {
   const imageUrl = product.idDefaultImage
     ? getProductImageUrl(product.id, product.idDefaultImage)
     : '';
-  const productLink = productUrl(locale, product.id, product.linkRewrite);
+  const productLink = productUrl(product, locale);
   return (
     <tr style={{ borderBottom: '1px solid var(--or-grey-lighter)' }}>
       <td style={{ padding: 8, width: 48 }}>

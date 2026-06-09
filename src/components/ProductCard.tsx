@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { PrestaProduct, getProductImageUrl } from '@/lib/presta';
-import { productUrl } from '@/lib/urls';
+import { productUrl } from '@/lib/url-builder';
 import { useLocale } from '@/lib/locale-context';
 import ProductPlayButton from './ProductPlayButton';
 import ProductBadges from './ProductBadges';
@@ -16,7 +16,7 @@ export default function ProductCard({ product }: Props) {
   const imageUrl = product.idDefaultImage
     ? getProductImageUrl(product.id, product.idDefaultImage)
     : '';
-  const productLink = productUrl(locale, product.id, product.linkRewrite);
+  const productLink = productUrl(product, locale);
 
   return (
     <article className="product-card" style={{ background: '#fff', border: 'none', borderRadius: 6, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column' }}>

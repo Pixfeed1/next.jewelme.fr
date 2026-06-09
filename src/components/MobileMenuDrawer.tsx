@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useLocale, LOCALES } from '@/lib/locale-context';
-import { categoryUrl, brandUrl } from '@/lib/urls';
+import { categoryUrl, manufacturerUrl, localeHref } from '@/lib/url-builder';
 import { mapPrestaUrl } from '@/lib/presta-url-mapper';
 import type { MegaMenuEntry } from '@/lib/megamenu';
 
@@ -50,7 +50,7 @@ export default function MobileMenuDrawer({ entries, locale, loginLabel }: Props)
           </button>
         </div>
 
-        <form action={`/${locale}/recherche`} method="GET" className="mobile-menu-search" onSubmit={close}>
+        <form action={localeHref('/recherche', locale)} method="GET" className="mobile-menu-search" onSubmit={close}>
           <input type="text" name="s" placeholder="Rechercher..." aria-label="Rechercher" />
           <button type="submit" aria-label="Rechercher">
             <i className="material-icons">search</i>
@@ -58,7 +58,7 @@ export default function MobileMenuDrawer({ entries, locale, loginLabel }: Props)
         </form>
 
         <nav className="mobile-menu-nav">
-          <Link href={`/${locale}/connexion`} onClick={close} className="mobile-menu-link mobile-menu-account">
+          <Link href={localeHref('/connexion', locale)} onClick={close} className="mobile-menu-link mobile-menu-account">
             <i className="material-icons">person</i>
             <span>{loginLabel}</span>
           </Link>
@@ -111,14 +111,14 @@ export default function MobileMenuDrawer({ entries, locale, loginLabel }: Props)
                     )}
                     {allCategories.map((cat) => (
                       <Link key={'c-' + cat.id}
-                        href={categoryUrl(locale, cat.id, (cat as any).link_rewrite || cat.name)}
+                        href={categoryUrl({ id: cat.id, linkRewrite: (cat as any).link_rewrite || cat.name }, locale)}
                         className="mobile-menu-sublink" onClick={close}>
                         {cat.name}
                       </Link>
                     ))}
                     {allManufacturers.map((m) => (
                       <Link key={'m-' + m.id}
-                        href={brandUrl(locale, m.id, (m as any).link_rewrite || m.name)}
+                        href={manufacturerUrl({ id: m.id, name: m.name, linkRewrite: (m as any).link_rewrite }, locale)}
                         className="mobile-menu-sublink" onClick={close}>
                         {m.name}
                       </Link>

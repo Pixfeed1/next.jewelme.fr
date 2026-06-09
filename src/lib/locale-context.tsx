@@ -27,12 +27,13 @@ export function LocaleProvider({ children, initialLocale = 'fr' }: { children: R
   const setLocale = (l: Locale) => {
     document.cookie = `locale=${l}; path=/; max-age=${60 * 60 * 24 * 365}`;
     setLocaleState(l);
-    // Rediriger vers la même page mais dans la nouvelle langue
+    // Rediriger vers la même page mais dans la nouvelle langue.
+    // FR = racine (pas de préfixe), EN = préfixe /en.
     const currentPath = window.location.pathname;
-    // Remove existing locale prefix if present
-    const stripped = currentPath.replace(/^\/(fr|en)(?=\/|$)/, '') || '/';
-    const target = `/${l}${stripped === '/' ? '' : stripped}` + window.location.search;
-    window.location.href = target;
+    const stripped = currentPath.replace(/^\/en(?=\/|$)/, '') || '/';
+    const prefix = l === 'en' ? '/en' : '';
+    const target = (prefix + (stripped === '/' ? '' : stripped)) || '/';
+    window.location.href = target + window.location.search;
   };
 
   const idLang = LOCALES.find(x => x.code === locale)?.id_lang ?? 1;

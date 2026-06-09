@@ -4,6 +4,7 @@ import { useCart } from '@/lib/cart-context';
 import { useLocale } from '@/lib/locale-context';
 import { useT } from '@/lib/i18n';
 import { getProductImageUrl } from '@/lib/presta';
+import { localeHref, productUrl } from '@/lib/url-builder';
 
 export default function CartSidePanel() {
   const { locale } = useLocale();
@@ -87,7 +88,7 @@ export default function CartSidePanel() {
                   )}
 
                   <div style={{ minWidth: 0 }}>
-                    <a href={`/${locale}/produit/${item.id_product}`} onClick={closePanel}
+                    <a href={productUrl({ id: item.id_product, linkRewrite: item.link_rewrite }, locale)} onClick={closePanel}
                       style={{ fontSize: 13, color: '#666', textDecoration: 'none', lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {item.name}
                     </a>
@@ -130,7 +131,7 @@ export default function CartSidePanel() {
               TVA incluse plus frais d&apos;envoi : {fmt(tax)}
             </div>
 
-            <a href={`/${locale}/panier`} onClick={closePanel}
+            <a href={localeHref('/panier', locale)} onClick={closePanel}
               className="btn-commander" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 28px', color: '#fff', borderRadius: 4, textDecoration: 'none', fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 auto', justifyContent: 'center' }}>
               {t('order')} <span style={{ fontSize: 16, lineHeight: 1 }}>▸</span>
             </a>
