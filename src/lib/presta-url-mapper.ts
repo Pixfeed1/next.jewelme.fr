@@ -1,54 +1,52 @@
 /**
- * Convertit une URL renvoyée par Presta (megamenu, CMS links, etc.)
- * vers la route Next.js équivalente, préfixée avec la locale.
+ * Normalise une URL renvoyée par Presta (megamenu, liens CMS, etc.) vers la
+ * route Next.js équivalente. Comme le front reproduit À L'IDENTIQUE les URLs
+ * Presta, la plupart des liens (catégories `/{id}-{rewrite}`, CMS
+ * `/content/{id}-{rewrite}`) sont déjà au bon format : on se contente de
+ * préfixer la locale (`/en` en anglais, rien en français).
  *
  * Exemples (locale='fr') :
- *  /                            -> /fr
- *  /36-onlyroots-records        -> /fr/categorie/onlyroots-records-36
- *  /vente-en-gros?id=1          -> /fr/page/vente-en-gros
- *  /content/14-faq              -> /fr/page/faq
- *  /nous-contacter              -> /fr/nous-contacter
- *  /connexion                   -> /fr/connexion
+ *  /                            -> /
+ *  /36-onlyroots-records        -> /36-onlyroots-records
+ *  /content/14-faq              -> /content/14-faq
+ *  /contact-us                  -> /nous-contacter
  *  https://www.foo.com/...      -> tel quel (externe)
  */
+import { homeUrl } from './url-builder';
+
 export function mapPrestaUrl(link: string | undefined | null, locale: string = 'fr'): string {
-  if (!link) return `/${locale}`;
+  const prefix = locale === 'en' ? '/en' : '';
+  if (!link) return homeUrl(locale);
   const url = String(link).trim();
 
-  // External URLs : leave alone
+  // URLs externes : on ne touche pas
   if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('mailto:') || url.startsWith('tel:')) {
     return url;
   }
 
-  // Root → /{locale}
-  if (url === '/' || url === '') return `/${locale}`;
+  // Racine -> home
+  if (url === '/' || url === '') return homeUrl(locale);
 
-  // /content/X-slug → /{locale}/page/slug
-  const cms = url.match(/^\/content\/(\d+)-(.+?)(?:\?|$)/);
-  if (cms) return `/${locale}/page/${cms[2]}`;
-
-  // /vente-en-gros?id=1 (CMS via friendly slug) → /{locale}/page/vente-en-gros?form=1
-  // Le ?id=N pointe vers un formulaire PowerfulForm a afficher dans la page CMS
-  const cmsFriendly = url.match(/^\/([a-z0-9\-]+)\?id=(\d+)$/);
-  if (cmsFriendly) return `/${locale}/page/${cmsFriendly[1]}?form=${cmsFriendly[2]}`;
-
-  // /N-slug → /{locale}/categorie/slug-N (SEO friendly)
-  const cat = url.match(/^\/(\d+)-(.+?)(?:\?|$)/);
-  if (cat) return `/${locale}/categorie/${cat[2]}-${cat[1]}`;
-
-  // Fixed aliases EN -> FR (le menu Presta renvoie les link_rewrite EN, on les remappe sur nos routes)
+  // Alias contact (Presta renvoie /contact-us) -> notre route /nous-contacter
   if (url === '/contact-us' || url.startsWith('/contact-us?') || url.startsWith('/contact-us/')) {
-    return `/${locale}/nous-contacter`;
+    return `${prefix}/nous-contacter`;
   }
-  // Fixed paths recognised
-  const known = ['/nous-contacter', '/connexion', '/panier'];
+
+  // /content/{id}-{slug}  et  /{id}-{slug} (catégorie) : déjà au format Presta,
+  // on préfixe juste la locale.
+  if (/^\/content\/\d+-/.test(url) || /^\/\d+-/.test(url)) {
+    return `${prefix}${url}`;
+  }
+
+  // Routes fonctionnelles connues
+  const known = ['/nous-contacter', '/connexion', '/inscription', '/panier', '/checkout'];
   for (const k of known) {
     if (url === k || url.startsWith(k + '?') || url.startsWith(k + '/')) {
-      return `/${locale}${url}`;
+      return `${prefix}${url}`;
     }
   }
 
-  // Default : prefix with locale
-  if (url.startsWith('/')) return `/${locale}${url}`;
-  return `/${locale}/${url}`;
+  // Défaut : préfixe la locale
+  if (url.startsWith('/')) return `${prefix}${url}`;
+  return `${prefix}/${url}`;
 }

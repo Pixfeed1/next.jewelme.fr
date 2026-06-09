@@ -5,7 +5,7 @@ import { fetchMegaMenu, MegaMenuEntry } from '@/lib/megamenu';
 import { mapPrestaUrl } from '@/lib/presta-url-mapper';
 import { cookies } from 'next/headers';
 import type { Locale } from '@/lib/locale-context';
-import { categoryUrl, brandUrl } from '@/lib/urls';
+import { categoryUrl, manufacturerUrl, homeUrl, localeHref } from '@/lib/url-builder';
 import CartBadge from './CartBadge';
 import LocaleSwitcher from './LocaleSwitcher';
 import MobileMenuDrawer from './MobileMenuDrawer';
@@ -40,7 +40,7 @@ export default async function Header() {
         <div className="header-main-grid" style={{ maxWidth: 1600, margin: '0 auto', padding: '0 32px', display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', gap: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <MobileMenuDrawer entries={megamenu.entries} locale={locale} loginLabel={t('login')} />
-            <Link href={`/${locale}`} style={{ flexShrink: 0, textDecoration: 'none' }}>
+            <Link href={homeUrl(locale)} style={{ flexShrink: 0, textDecoration: 'none' }}>
               {shop.logo_url ? (
                 <img src={shop.logo_url} alt={shop.name} className="header-logo-img" style={{ width: 'auto', display: 'block' }} />
               ) : (
@@ -61,7 +61,7 @@ export default async function Header() {
           </div>
 
           <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: 16, justifyContent: 'flex-end' }}>
-            <a href={`/${locale}/connexion`} className="header-action-link" style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#fff', fontSize: 13, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+            <a href={localeHref('/connexion', locale)} className="header-action-link" style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#fff', fontSize: 13, textDecoration: 'none', whiteSpace: 'nowrap' }}>
               <i className="material-icons" style={{ fontSize: 22 }}>person</i>
               <span>{t('login')}</span>
             </a>
@@ -162,7 +162,7 @@ function renderMenuItem(entry: MegaMenuEntry, locale: string) {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column' }}>
             {allCategories.map((cat) => (
               <li key={'c-' + cat.id}>
-                <Link href={categoryUrl(locale, cat.id, (cat as any).link_rewrite || cat.name)}
+                <Link href={categoryUrl({ id: cat.id, linkRewrite: (cat as any).link_rewrite || cat.name }, locale)}
                       style={{ display: 'block', padding: '10px 16px', color: 'var(--or-text)', textDecoration: 'none', fontSize: 13, fontWeight: 500, borderBottom: '1px solid var(--or-bg-soft)' }}>
                   {cat.name}
                 </Link>
@@ -174,7 +174,7 @@ function renderMenuItem(entry: MegaMenuEntry, locale: string) {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column' }}>
             {allManufacturers.map((m) => (
               <li key={'m-' + m.id}>
-                <Link href={brandUrl(locale, m.id, (m as any).link_rewrite || m.name)}
+                <Link href={manufacturerUrl({ id: m.id, name: m.name, linkRewrite: (m as any).link_rewrite }, locale)}
                       style={{ display: 'block', padding: '10px 16px', color: 'var(--or-text)', textDecoration: 'none', fontSize: 13, fontWeight: 500, borderBottom: '1px solid var(--or-bg-soft)' }}>
                   {m.name}
                 </Link>

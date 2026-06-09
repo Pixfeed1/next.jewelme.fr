@@ -50,6 +50,8 @@ export interface PrestaProduct {
   idManufacturer: number;
   manufacturerLinkRewrite: string;
   linkRewrite: string;
+  /** link_rewrite de la catégorie par défaut — segment SEO de l'URL produit Presta */
+  categorySlug: string;
   quantity: number;
   metaTitle: string;
   metaDescription: string;
@@ -145,6 +147,7 @@ function normalizeProduct(raw: Record<string, unknown>, taxRates: { default_rate
     idManufacturer: parseInt(String(raw.id_manufacturer ?? '0'), 10),
     manufacturerLinkRewrite: '',
     linkRewrite: extractLangValue(raw.link_rewrite),
+    categorySlug: '',
     quantity: parseInt(String(raw.quantity ?? '0'), 10),
     metaTitle: extractLangValue(raw.meta_title),
     metaDescription: extractLangValue(raw.meta_description),
@@ -201,10 +204,11 @@ export async function fetchProducts(opts: {
   const rawProducts = (data.products || []).filter((p: any) => p.active === '1');
   const ids = rawProducts.map((p: any) => parseInt(String(p.id), 10));
   const stocks = await fetchStocksForProducts(ids);
-  return rawProducts.map((raw: any) => {
+  const normalized = rawProducts.map((raw: any) => {
     const prod = normalizeProduct(raw, taxRates);
     return { ...prod, quantity: stocks[prod.id] ?? prod.quantity };
   });
+  return withCategorySlugs(normalized, opts.language ?? 1);
 }
 
 
@@ -253,6 +257,11 @@ export async function fetchProduct(id: number, language = 1): Promise<PrestaProd
   if (stocks[product.id] !== undefined) {
     product = { ...product, quantity: stocks[product.id] };
   }
+  // Renseigne le slug de la catégorie par défaut (segment SEO de l'URL produit)
+  if (product.idCategoryDefault > 0) {
+    const slugMap = await fetchCategorySlugMap([product.idCategoryDefault], language);
+    product = { ...product, categorySlug: slugMap[product.idCategoryDefault] ?? '' };
+  }
   // Resout les features (Format, Annee, Pays, Genre, etc.) en parallele
   const assocFeatures = (((raw.associations as Record<string, unknown> | undefined)?.product_features) as Array<{ id: string; id_feature_value: string }> | undefined) || [];
   if (assocFeatures.length > 0) {
@@ -291,6 +300,52 @@ export async function fetchCategory(id: number, language = 1): Promise<PrestaCat
   if (!res.ok) return null;
   const data = await res.json();
   return data.category ? normalizeCategory(data.category) : null;
+}
+
+/**
+ * Résout les link_rewrite de catégories par lot (pour construire les URLs
+ * produit SEO `/{cat-rewrite}/{id}-{rewrite}.html`).
+ * Cache en mémoire process pour éviter de refetcher les mêmes catégories.
+ */
+const _catSlugCache = new Map<number, string>();
+
+async function fetchCategorySlugMap(ids: number[], language = 1): Promise<Record<number, string>> {
+  const out: Record<number, string> = {};
+  const missing: number[] = [];
+  for (const id of Array.from(new Set(ids.filter((i) => i > 0)))) {
+    if (_catSlugCache.has(id)) out[id] = _catSlugCache.get(id)!;
+    else missing.push(id);
+  }
+  if (missing.length === 0) return out;
+  // URL construite manuellement pour ne PAS encoder les crochets [] (filtre OR Presta)
+  const url = `${API_URL}/categories?ws_key=${API_KEY}&output_format=JSON&display=[id,link_rewrite]&filter[id]=[${missing.join('|')}]&language=${language}&limit=${missing.length}`;
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      for (const c of (data.categories || []) as Array<Record<string, unknown>>) {
+        const id = parseInt(String(c.id), 10);
+        const slug = extractLangValue(c.link_rewrite);
+        if (id > 0 && slug) {
+          _catSlugCache.set(id, slug);
+          out[id] = slug;
+        }
+      }
+    }
+  } catch (e) {
+    console.error('[Presta] fetchCategorySlugMap error:', e);
+  }
+  return out;
+}
+
+/** Renseigne `categorySlug` sur une liste de produits (mutation immuable). */
+async function withCategorySlugs(products: PrestaProduct[], language = 1): Promise<PrestaProduct[]> {
+  if (products.length === 0) return products;
+  const slugMap = await fetchCategorySlugMap(
+    products.map((p) => p.idCategoryDefault),
+    language
+  );
+  return products.map((p) => ({ ...p, categorySlug: slugMap[p.idCategoryDefault] ?? '' }));
 }
 
 export function getProductImageUrl(idProduct: number, idImage: number): string {
@@ -340,7 +395,8 @@ export async function fetchProductsByIds(ids: number[], language = 1): Promise<P
 
   // Préserve l'ordre des IDs en entrée (Presta peut retourner dans un ordre arbitraire)
   const orderMap = new Map(uniqueIds.map((id, i) => [id, i]));
-  return products.sort((a, b) => (orderMap.get(a.id) ?? 999) - (orderMap.get(b.id) ?? 999));
+  products.sort((a, b) => (orderMap.get(a.id) ?? 999) - (orderMap.get(b.id) ?? 999));
+  return withCategorySlugs(products, language);
 }
 
 /**
@@ -454,12 +510,67 @@ export async function fetchProductsByManufacturer(idManufacturer: number, langua
     const rawProducts = (data.products || []).filter((p: { active?: string }) => p.active === '1');
     const ids = rawProducts.map((p: Record<string, unknown>) => parseInt(String(p.id), 10));
     const stocks = await fetchStocksForProducts(ids);
-    return rawProducts.map((raw: Record<string, unknown>) => {
+    const normalized = rawProducts.map((raw: Record<string, unknown>) => {
       const prod = normalizeProduct(raw, taxRates);
       return { ...prod, quantity: stocks[prod.id] ?? prod.quantity };
     });
+    return withCategorySlugs(normalized, language);
   } catch (e) {
     console.error('[fetchProductsByManufacturer] failed:', e);
+    return [];
+  }
+}
+
+export interface PrestaSupplier {
+  id: number;
+  name: string;
+  linkRewrite: string;
+  description: string;
+  active: boolean;
+  metaTitle: string;
+  metaDescription: string;
+}
+
+export async function fetchSupplier(id: number, language: number = 1): Promise<PrestaSupplier | null> {
+  const url = `${API_URL}/suppliers/${id}?ws_key=${API_KEY}&output_format=JSON&display=full&language=${language}`;
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const raw = (data.suppliers && data.suppliers[0]) || data.supplier;
+    if (!raw) return null;
+    return {
+      id: parseInt(String(raw.id), 10),
+      name: String(raw.name ?? ''),
+      linkRewrite: String(raw.link_rewrite ?? ''),
+      description: extractLangValue(raw.description),
+      active: String(raw.active) === '1',
+      metaTitle: extractLangValue(raw.meta_title),
+      metaDescription: extractLangValue(raw.meta_description),
+    };
+  } catch (e) {
+    console.error('[fetchSupplier] failed:', e);
+    return null;
+  }
+}
+
+export async function fetchProductsBySupplier(idSupplier: number, language: number = 1): Promise<PrestaProduct[]> {
+  const url = `${API_URL}/products?ws_key=${API_KEY}&output_format=JSON&display=full&language=${language}&filter[id_supplier]=${idSupplier}&filter[active]=1&sort=[id_DESC]&limit=500`;
+  try {
+    const res = await fetch(url, { cache: 'no-store' });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const taxRates = await fetchTaxRates();
+    const rawProducts = (data.products || []).filter((p: { active?: string }) => p.active === '1');
+    const ids = rawProducts.map((p: Record<string, unknown>) => parseInt(String(p.id), 10));
+    const stocks = await fetchStocksForProducts(ids);
+    const normalized = rawProducts.map((raw: Record<string, unknown>) => {
+      const prod = normalizeProduct(raw, taxRates);
+      return { ...prod, quantity: stocks[prod.id] ?? prod.quantity };
+    });
+    return withCategorySlugs(normalized, language);
+  } catch (e) {
+    console.error('[fetchProductsBySupplier] failed:', e);
     return [];
   }
 }

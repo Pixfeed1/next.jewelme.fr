@@ -2,12 +2,15 @@
 
 import ProductPlayButton from './ProductPlayButton';
 import { PrestaProduct, getProductImageUrl } from '@/lib/presta';
+import { productUrl } from '@/lib/url-builder';
+import { useLocale } from '@/lib/locale-context';
 
 interface Props {
   product: PrestaProduct;
 }
 
 export default function ProductActions({ product }: Props) {
+  const { locale } = useLocale();
   const coverUrl = product.idDefaultImage
     ? getProductImageUrl(product.id, product.idDefaultImage)
     : '';
@@ -16,7 +19,7 @@ export default function ProductActions({ product }: Props) {
       <ProductPlayButton
         productId={product.id}
         productName={product.name}
-        productLink={`/produit/${product.id}`}
+        productLink={productUrl(product, locale)}
         coverUrl={coverUrl}
         size={56}
         variant="inline"

@@ -92,3 +92,8 @@ export async function fetchCmsBySlug(slug: string): Promise<CmsPage | null> {
   const pages = await fetchCmsPages();
   return pages.find((p) => p.active && Object.values(p.slugByLang).includes(slug)) || null;
 }
+
+export async function fetchCmsById(id: number): Promise<CmsPage | null> {
+  const pages = await fetchCmsPages();
+  return pages.find((p) => p.active && p.id === id) || null;
+}

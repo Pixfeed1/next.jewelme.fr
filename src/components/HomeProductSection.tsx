@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 import type { PrestaProduct } from '@/lib/presta';
+import { fetchCategory } from '@/lib/presta';
 import type { SliderConfig } from '@/lib/headless-api';
+import { categoryUrl, idLangFromLocale } from '@/lib/url-builder';
 import ProductCard from './ProductCard';
 import ProductCarousel from './ProductCarousel';
 
@@ -23,6 +25,11 @@ export default async function HomeProductSection({ title, products, sliderConfig
   const locale = (cookieStore.get('locale')?.value === 'en' ? 'en' : 'fr');
   if (products.length === 0) return null;
   const useCarousel = sliderConfig?.enabled === true;
+  // Résout le link_rewrite de la catégorie pour construire l'URL SEO `/{id}-{rewrite}`
+  const category = categoryId ? await fetchCategory(categoryId, idLangFromLocale(locale)).catch(() => null) : null;
+  const viewAllHref = categoryId
+    ? categoryUrl({ id: categoryId, linkRewrite: category?.linkRewrite || '' }, locale)
+    : null;
 
   return (
     <section style={{ marginBottom: 48 }}>
@@ -30,8 +37,8 @@ export default async function HomeProductSection({ title, products, sliderConfig
         <h2 style={{ fontSize: 18, textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
           {title}
         </h2>
-        {categoryId ? (
-          <Link href={`/${locale}/categorie/${categoryId}`} className="view-all-link" style={{ color: 'var(--or-text)', textDecoration: 'none', fontSize: 14, display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
+        {viewAllHref ? (
+          <Link href={viewAllHref} className="view-all-link" style={{ color: 'var(--or-text)', textDecoration: 'none', fontSize: 14, display: 'inline-flex', alignItems: 'center', whiteSpace: 'nowrap' }}>
             Voir plus<ArrowIcon />
           </Link>
         ) : null}
