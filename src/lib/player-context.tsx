@@ -116,6 +116,27 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     });
   }, [loadTrack]);
 
+  // Fin d'une piste : enchaîne automatiquement la suivante, ou stoppe proprement
+  // en fin de playlist. On force l'autoplay (sans dépendre de isPlaying, qui peut
+  // déjà avoir basculé à false via un event "pause" émis juste avant "ended").
+  const handleEnded = useCallback(() => {
+    setState((s) => {
+      if (!s.playlist.length) return s;
+      const isLast = s.currentTrack >= s.playlist.length - 1;
+      if (isLast) {
+        pendingAutoplayRef.current = false;
+        if (audioRef.current) {
+          try { audioRef.current.currentTime = 0; } catch {}
+        }
+        return { ...s, isPlaying: false, currentTime: 0 };
+      }
+      const i = s.currentTrack + 1;
+      pendingAutoplayRef.current = true;
+      requestAnimationFrame(() => loadTrack(i, s.playlist));
+      return { ...s, currentTrack: i, currentTime: 0, duration: 0 };
+    });
+  }, [loadTrack]);
+
   const seek = useCallback((time: number) => {
     if (audioRef.current && isFinite(time)) audioRef.current.currentTime = time;
   }, []);
@@ -157,7 +178,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         play();
       }
     };
-    const onEnded = () => next();
+    const onEnded = () => handleEnded();
     const onVolume = () => update({ volume: audio.volume, muted: audio.muted });
 
     audio.addEventListener('play', onPlay);
@@ -175,7 +196,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audio.removeEventListener('ended', onEnded);
       audio.removeEventListener('volumechange', onVolume);
     };
-  }, [next, play, update]);
+  }, [handleEnded, play, update]);
 
   useEffect(() => {
     if (audioRef.current) audioRef.current.volume = state.volume;
