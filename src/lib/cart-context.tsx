@@ -1,5 +1,6 @@
 'use client';
 import { trackAddToCart, trackRemoveFromCart } from './gtag';
+import { decodeHtmlEntities } from './text-utils';
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
 
 export interface CartItem {
@@ -55,6 +56,18 @@ interface CartContextValue {
 const CartCtx = createContext<CartContextValue | null>(null);
 const TOKEN_KEY = 'pixfeed_cart_token';
 
+/** Décode les entités HTML (`&amp;` → `&`) dans les noms affichés du panier. */
+function decodeCart(c: CartState | null): CartState | null {
+  if (!c) return c;
+  if (Array.isArray(c.items)) {
+    for (const it of c.items) if (it.name) it.name = decodeHtmlEntities(it.name);
+  }
+  if (Array.isArray(c.vouchers_applied)) {
+    for (const v of c.vouchers_applied) if (v.name) v.name = decodeHtmlEntities(v.name);
+  }
+  return c;
+}
+
 function genToken(): string {
   // Presta secure_key max 32 chars : on supprime les tirets de l'UUID (=32 chars)
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID().replace(/-/g, '');
@@ -73,7 +86,12 @@ function getOrCreateToken(): string {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartState | null>(null);
+  const [cart, setCartRaw] = useState<CartState | null>(null);
+  // Décode les entités HTML des noms (produits, bons de réduction) renvoyés par Presta
+  const setCart: typeof setCartRaw = (value) => {
+    if (typeof value === 'function') { setCartRaw(value); return; }
+    setCartRaw(decodeCart(value));
+  };
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [panelOpen, setPanelOpen] = useState(false);

@@ -1,5 +1,6 @@
 import { getServerIdLang } from './server-locale';
 import { cache } from 'react';
+import { decodeHtmlEntities } from './text-utils';
 
 const PRESTA_BASE = (process.env.PRESTA_API_URL || '').replace(/\/api\/?$/, '');
 const API_KEY = process.env.PRESTA_API_KEY || '';
@@ -41,7 +42,12 @@ export const fetchShopConfig = cache(async (): Promise<ShopConfig> => {
       console.error('[ShopConfig] HTTP', res.status);
       return emptyConfig();
     }
-    return await res.json();
+    const data: ShopConfig = await res.json();
+    if (data.shop?.name) data.shop.name = decodeHtmlEntities(data.shop.name);
+    for (const page of data.cms_pages ?? []) {
+      if (page.title) page.title = decodeHtmlEntities(page.title);
+    }
+    return data;
   } catch (err) {
     console.error('[ShopConfig] error:', err);
     return emptyConfig();

@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import { getServerIdLang } from './server-locale';
+import { decodeHtmlEntities } from './text-utils';
 
 const PRESTA_BASE = (process.env.PRESTA_API_URL || '').replace(/\/api\/?$/, '');
 const API_KEY = process.env.PRESTA_API_KEY || '';
@@ -34,13 +35,25 @@ export interface FiltersResponse {
   warning?: string;
 }
 
+/** Décode les entités HTML dans les libellés de filtres (noms de groupes + valeurs). */
+function decodeFilters(data: FiltersResponse): FiltersResponse {
+  if (!data?.groups) return data;
+  for (const g of data.groups) {
+    g.name = decodeHtmlEntities(g.name);
+    if (Array.isArray(g.values)) {
+      for (const v of g.values) v.name = decodeHtmlEntities(v.name);
+    }
+  }
+  return data;
+}
+
 export const fetchFilters = cache(async (idCategory: number): Promise<FiltersResponse> => {
   const idLang = await getServerIdLang();
   const url = `${PRESTA_BASE}/index.php?fc=module&module=pixfeed_headless_api&controller=filters&id_category=${idCategory}&id_lang=${idLang}&ws_key=${API_KEY}`;
   try {
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) return { meta: { id_category: idCategory, id_lang: idLang }, groups: [], warning: `HTTP ${res.status}` };
-    return await res.json();
+    return decodeFilters(await res.json());
   } catch (e: any) {
     return { meta: { id_category: idCategory, id_lang: idLang }, groups: [], warning: e.message };
   }
@@ -52,7 +65,7 @@ export const fetchFiltersByManufacturer = cache(async (idManufacturer: number): 
   try {
     const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) return { meta: { id_category: 0, id_lang: idLang }, groups: [], warning: `HTTP ${res.status}` };
-    return await res.json();
+    return decodeFilters(await res.json());
   } catch (e: any) {
     return { meta: { id_category: 0, id_lang: idLang }, groups: [], warning: e.message };
   }

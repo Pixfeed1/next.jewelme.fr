@@ -1,6 +1,7 @@
 import { cache } from 'react';
 
 import { getServerIdLang } from './server-locale';
+import { decodeHtmlEntities } from './text-utils';
 
 const PRESTA_BASE = (process.env.PRESTA_API_URL || '').replace(/\/api\/?$/, '');
 const API_KEY = process.env.PRESTA_API_KEY || '';
@@ -63,7 +64,16 @@ export const fetchMegaMenu = cache(async (): Promise<MegaMenu> => {
       console.error('[MegaMenu] HTTP', res.status);
       return emptyMenu(`HTTP ${res.status}`);
     }
-    return await res.json();
+    const data: MegaMenu = await res.json();
+    // Décode les libellés affichés (entrées + catégories + manufacturers du dropdown)
+    for (const entry of data.entries ?? []) {
+      if (entry.name) entry.name = decodeHtmlEntities(entry.name);
+      for (const group of entry.dropdown ?? []) {
+        for (const cat of group.categories ?? []) cat.name = decodeHtmlEntities(cat.name);
+        for (const m of group.manufacturers ?? []) m.name = decodeHtmlEntities(m.name);
+      }
+    }
+    return data;
   } catch (err) {
     console.error('[MegaMenu] error:', err);
     return emptyMenu(String(err));

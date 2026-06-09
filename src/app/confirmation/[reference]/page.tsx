@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { headers } from 'next/headers';
 import { getProductImageUrl } from '@/lib/presta';
 import { homeUrl } from '@/lib/url-builder';
+import { decodeHtmlEntities } from '@/lib/text-utils';
 import TrackPurchase from '@/components/TrackPurchase';
 
 const PRESTA_API_URL = process.env.PRESTA_API_URL || 'https://www.onlyroots-reggae.com';
@@ -24,7 +25,10 @@ async function fetchOrder(reference: string): Promise<OrderData | null> {
   try {
     const r = await fetch(`${PRESTA_API_URL.replace('/api','')}/headless/order?reference=${encodeURIComponent(reference)}&ws_key=${PRESTA_API_KEY}`, { cache: 'no-store' });
     if (!r.ok) return null;
-    return await r.json();
+    const order: OrderData = await r.json();
+    for (const it of order.items ?? []) if (it.name) it.name = decodeHtmlEntities(it.name);
+    if (order.carrier?.name) order.carrier.name = decodeHtmlEntities(order.carrier.name);
+    return order;
   } catch { return null; }
 }
 
