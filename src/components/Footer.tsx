@@ -118,13 +118,10 @@ export default async function Footer() {
             </div>
           )}
 
-          {(shop.email || shop.phone || shop.address1) && (
+          {(shop.email || shop.phone) && (
             <div>
               <p className="h4" style={{ fontSize: 16, marginBottom: 16, marginTop: 0 }}>Contact</p>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8, fontSize: 14, color: 'var(--or-grey-light)' }}>
-                {shop.address1 && (
-                  <li>{shop.address1}{shop.zip ? `, ${shop.zip}` : ''} {shop.city}</li>
-                )}
                 {shop.phone && (
                   <li><a href={`tel:${shop.phone.replace(/\s/g, '')}`} style={{ color: 'inherit', textDecoration: 'none' }}>{shop.phone}</a></li>
                 )}
