@@ -104,8 +104,12 @@ export default function CheckoutPage() {
     fetch(`/api/checkout/carriers?token=${encodeURIComponent(token)}&id_country=${deliveryAddr.id_country}&postcode=${encodeURIComponent(deliveryAddr.postcode)}`)
       .then(r => r.json())
       .then(d => {
-        setCarriers(d.carriers || []);
-        if ((d.carriers || []).length > 0 && idCarrier === null) setIdCarrier(d.carriers[0].id);
+        // Trie les transporteurs du moins cher au plus cher
+        const sorted: Carrier[] = [...(d.carriers || [])].sort(
+          (a: Carrier, b: Carrier) => (a.price ?? 0) - (b.price ?? 0)
+        );
+        setCarriers(sorted);
+        if (sorted.length > 0 && idCarrier === null) setIdCarrier(sorted[0].id);
         setLoadingCarriers(false);
       })
       .catch(() => setLoadingCarriers(false));
