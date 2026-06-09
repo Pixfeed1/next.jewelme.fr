@@ -50,7 +50,7 @@ export default function ProductCardCartButton({ idProduct, name, price, quantity
         justifyContent: 'center',
         padding: 0,
         background: outOfStock ? '#888' : (success ? '#3f6e51' : '#a3a2a2'),
-        cursor: outOfStock ? 'not-allowed' : (pending ? 'wait' : 'pointer'),
+        cursor: outOfStock ? 'default' : (pending ? 'wait' : 'pointer'),
         transition: 'background 0.25s ease',
       }}
     >
