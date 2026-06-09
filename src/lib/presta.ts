@@ -184,11 +184,9 @@ function normalizeProduct(raw: Record<string, unknown>, taxRates: { default_rate
     metaDescription: decodeHtmlEntities(extractLangValue(raw.meta_description)),
     metaKeywords: decodeHtmlEntities(extractLangValue(raw.meta_keywords)),
     condition: (() => {
+      // Clé brute ('new' | 'used' | 'refurbished') — localisée à l'affichage
       const c = String(raw.condition ?? '').toLowerCase();
-      if (c === 'new') return 'Neuf';
-      if (c === 'used') return 'Occasion';
-      if (c === 'refurbished') return 'Reconditionné';
-      return '';
+      return c === 'new' || c === 'used' || c === 'refurbished' ? c : '';
     })(),
     features: [],
   };
@@ -249,7 +247,8 @@ export async function fetchProducts(opts: {
  * de Presta. Nécessite 2 fetchs par feature (feature + feature_value).
  */
 async function fetchProductFeatures(
-  featureAssocs: Array<{ id: string; id_feature_value: string }>
+  featureAssocs: Array<{ id: string; id_feature_value: string }>,
+  language = 1
 ): Promise<Array<{ name: string; value: string }>> {
   return Promise.all(
     featureAssocs.map(async (assoc) => {
@@ -261,8 +260,8 @@ async function fetchProductFeatures(
         const fData = fRes.ok ? await fRes.json() : null;
         const vData = vRes.ok ? await vRes.json() : null;
         return {
-          name: decodeHtmlEntities(extractLangValue(fData?.product_feature?.name)),
-          value: decodeHtmlEntities(extractLangValue(vData?.product_feature_value?.value)),
+          name: decodeHtmlEntities(extractLangValue(fData?.product_feature?.name, language)),
+          value: decodeHtmlEntities(extractLangValue(vData?.product_feature_value?.value, language)),
         };
       } catch {
         return { name: '', value: '' };
@@ -296,7 +295,7 @@ export async function fetchProduct(id: number, language = 1): Promise<PrestaProd
   // Resout les features (Format, Annee, Pays, Genre, etc.) en parallele
   const assocFeatures = (((raw.associations as Record<string, unknown> | undefined)?.product_features) as Array<{ id: string; id_feature_value: string }> | undefined) || [];
   if (assocFeatures.length > 0) {
-    const features = await fetchProductFeatures(assocFeatures);
+    const features = await fetchProductFeatures(assocFeatures, language);
     product.features = features.filter((f) => f.name && f.value);
   }
   return product;

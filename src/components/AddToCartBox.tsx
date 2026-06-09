@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import type { PrestaProduct } from '@/lib/presta';
 import { useCart } from '@/lib/cart-context';
+import { useT } from '@/lib/i18n';
 import { trackAddToCart } from '@/lib/gtag';
 
 interface Props {
@@ -14,6 +15,7 @@ export default function AddToCartBox({ product }: Props) {
   const [pending, setPending] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
   const { addItem } = useCart();
+  const t = useT();
 
   const handleAdd = async () => {
     if (outOfStock) return;
@@ -50,7 +52,7 @@ export default function AddToCartBox({ product }: Props) {
           <circle cx="9" cy="19" r="1" />
           <circle cx="18" cy="19" r="1" />
         </svg>
-        {outOfStock ? 'Indisponible' : (pending ? 'Ajout…' : 'Ajouter au panier')}
+        {outOfStock ? t('out_of_stock') : (pending ? t('adding') : t('add_to_cart'))}
       </button>
       {feedback && (
         <div style={{ flexBasis: '100%', marginTop: 4, padding: '8px 12px', borderRadius: 4, fontSize: 13, background: feedback.type === 'success' ? '#e8f5e9' : '#fde7e7', color: feedback.type === 'success' ? '#1b4d2e' : '#a71212', border: `1px solid ${feedback.type === 'success' ? '#3f6e51' : '#d0121a'}` }}>

@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { categoryUrl, productUrl, manufacturerUrl, homeUrl, idLangFromLocale } from '@/lib/url-builder';
 import TrackViewItem from '@/components/TrackViewItem';
 import { notFound } from 'next/navigation';
+import { translations, type TranslationKey } from '@/lib/i18n';
 import type { Metadata } from 'next';
 
 export async function productMetadata(productId: number, locale: string): Promise<Metadata> {
@@ -51,12 +52,16 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
   const hasLongDescription = product.description && product.description.trim().length > 0;
   const hasFeatures = product.features && product.features.length > 0;
 
+  const L = locale === 'en' ? 'en' : 'fr';
+  const tr = (k: TranslationKey) => translations[L][k] ?? k;
+  const conditionLabel = product.condition ? tr(`cond_${product.condition}` as TranslationKey) : '';
+
   return (
     <>
       {trackingNode}
     <div style={{ maxWidth: 1280, paddingLeft: 32, paddingRight: 16 }}>
       <p style={{ marginBottom: 24, fontSize: 13 }}>
-        <Link href={homeUrl(locale)} style={{ color: '#888', textDecoration: 'none' }}>Accueil</Link>
+        <Link href={homeUrl(locale)} style={{ color: '#888', textDecoration: 'none' }}>{tr('home')}</Link>
         {category && (
           <>
             <span style={{ color: '#ccc', margin: '0 8px' }}>›</span>
@@ -85,7 +90,7 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
           </h1>
           {product.manufacturerName && (
             <p style={{ color: '#666', fontSize: 14, marginBottom: 8, marginTop: 0 }}>
-              Label : {product.idManufacturer > 0 ? (
+              {tr('label_word')} : {product.idManufacturer > 0 ? (
                 <Link href={manufacturerUrl({ id: product.idManufacturer, name: product.manufacturerName }, locale)} style={{ color: 'var(--or-text)', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid currentColor' }}>{product.manufacturerName}</Link>
               ) : (
                 <span style={{ color: 'var(--or-text)', fontWeight: 500 }}>{product.manufacturerName}</span>
@@ -93,11 +98,16 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
             </p>
           )}
           <p style={{ color: '#888', fontSize: 13, marginBottom: 4, marginTop: 0 }}>
-            Référence : {product.reference || '-'}
+            {tr('reference')} : {product.reference || '-'}
           </p>
           {product.condition && (
             <p style={{ color: '#888', fontSize: 13, marginBottom: 20, marginTop: 0 }}>
-              État : <span style={{ color: 'var(--or-text)', fontWeight: 500 }}>{product.condition}</span>
+              {tr('condition_label')} : <span style={{ color: 'var(--or-text)', fontWeight: 500 }}>{conditionLabel}</span>
+            </p>
+          )}
+          {product.descriptionShort && (
+            <p style={{ color: '#444', lineHeight: 1.6, marginBottom: 20, fontSize: 14 }}>
+              {product.descriptionShort}
             </p>
           )}
           <ProductSamplePlaylist
@@ -113,11 +123,6 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
           <p style={{ fontSize: 12, color: '#888', margin: 0, marginBottom: 24 }}>
             {locale === 'en' ? 'Incl. VAT plus Shipping Costs' : 'TTC, hors frais de port'}
           </p>
-          {product.descriptionShort && (
-            <p style={{ color: '#444', lineHeight: 1.6, marginBottom: 24, fontSize: 14 }}>
-              {product.descriptionShort}
-            </p>
-          )}
           <AddToCartBox product={product} />
           {(product.quantity ?? 0) <= 0 && (
             <MailAlertForm idProduct={product.id} productName={product.name} />
@@ -126,7 +131,7 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
           {hasFeatures && (
             <section style={{ marginTop: 24 }}>
               <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Détails de l&apos;article
+                {tr('item_details')}
               </h2>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <tbody>
@@ -151,7 +156,7 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
       {hasLongDescription && (
         <section style={{ marginTop: 32 }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            Plus d&apos;informations
+            {tr('more_info')}
           </h2>
           <div
             style={{ lineHeight: 1.7, fontSize: 14, color: '#333', padding: '20px 24px', border: '1px solid #e5e0d6', borderRadius: 4, background: '#fff' }}
