@@ -13,6 +13,24 @@ export default function CartPage() {
   const t = useT();
   const { cart, updateItem, removeItem } = useCart();
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [maxReachedKey, setMaxReachedKey] = useState<string | null>(null);
+
+  const flashMax = (key: string) => {
+    setMaxReachedKey(key);
+    setTimeout(() => setMaxReachedKey((k) => (k === key ? null : k)), 2500);
+  };
+
+  // Incrémente la quantité en la bornant au stock disponible (ne supprime jamais la ligne).
+  const handleIncrease = (id_product: number, currentQty: number, id_attr: number, max?: number) => {
+    const key = `${id_product}-${id_attr}`;
+    if (typeof max === 'number' && currentQty >= max) {
+      flashMax(key); // déjà au max : pas d'appel serveur, juste un feedback
+      return;
+    }
+    const nextQty = typeof max === 'number' ? Math.min(currentQty + 1, max) : currentQty + 1;
+    handleUpdate(id_product, nextQty, id_attr);
+    if (typeof max === 'number' && nextQty >= max) flashMax(key);
+  };
   const fmt = (n: number) => n.toFixed(2).replace('.', ',') + '\u00a0€';
 
   const handleUpdate = async (id_product: number, qty: number, id_attr: number) => {
@@ -75,22 +93,37 @@ export default function CartPage() {
                     {fmt(item.price_wt)}
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <button onClick={() => {
-                    if (item.quantity <= 1) {
-                      if (window.confirm('Retirer ce produit du panier ?')) {
-                        updateItem(item.id_product, 0, item.id_product_attribute);
-                      }
-                    } else {
-                      updateItem(item.id_product, item.quantity - 1, item.id_product_attribute);
-                    }
-                  }}
-                    style={{ width: 32, height: 32, border: '1px solid #ddd', background: '#fff', cursor: 'pointer', padding: 0, fontSize: 16, color: '#666' }}>−</button>
-                  <input value={item.quantity} readOnly
-                    style={{ width: 40, height: 32, border: '1px solid #ddd', borderLeft: 0, borderRight: 0, textAlign: 'center', fontSize: 14, background: '#fff' }} />
-                  <button onClick={() => updateItem(item.id_product, item.quantity + 1, item.id_product_attribute)}
-                    style={{ width: 32, height: 32, border: '1px solid #ddd', background: '#fff', cursor: 'pointer', padding: 0, fontSize: 16, color: '#666' }}>+</button>
-                </div>
+                {(() => {
+                  const key = `${item.id_product}-${item.id_product_attribute}`;
+                  const max = typeof item.quantity_available === 'number' ? item.quantity_available : undefined;
+                  const atMax = typeof max === 'number' && item.quantity >= max;
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <button onClick={() => {
+                          if (item.quantity <= 1) {
+                            if (window.confirm('Retirer ce produit du panier ?')) {
+                              updateItem(item.id_product, 0, item.id_product_attribute);
+                            }
+                          } else {
+                            updateItem(item.id_product, item.quantity - 1, item.id_product_attribute);
+                          }
+                        }}
+                          style={{ width: 32, height: 32, border: '1px solid #ddd', background: '#fff', cursor: 'pointer', padding: 0, fontSize: 16, color: '#666' }}>−</button>
+                        <input value={item.quantity} readOnly
+                          style={{ width: 40, height: 32, border: '1px solid #ddd', borderLeft: 0, borderRight: 0, textAlign: 'center', fontSize: 14, background: '#fff' }} />
+                        <button
+                          onClick={() => handleIncrease(item.id_product, item.quantity, item.id_product_attribute, max)}
+                          disabled={atMax}
+                          title={atMax ? 'Stock maximum atteint' : undefined}
+                          style={{ width: 32, height: 32, border: '1px solid #ddd', background: '#fff', cursor: atMax ? 'default' : 'pointer', padding: 0, fontSize: 16, color: atMax ? '#bbb' : '#666' }}>+</button>
+                      </div>
+                      {maxReachedKey === key && (
+                        <span style={{ fontSize: 10, color: '#bf1212', whiteSpace: 'nowrap' }}>Stock maximum atteint</span>
+                      )}
+                    </div>
+                  );
+                })()}
                 <button onClick={() => removeItem(item.id_product, item.id_product_attribute)} aria-label="Supprimer"
                   style={{ background: 'none', border: 0, color: '#999', cursor: 'pointer', padding: 6 }}>
                   <i className="material-icons" style={{ fontSize: 20 }}>delete_outline</i>
