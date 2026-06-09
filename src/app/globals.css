@@ -10,6 +10,14 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* OnlyRoots palette */
+  --color-or-green: #5a9e74;
+  --color-or-green-dark: #3f6e51;
+  --color-or-dark: #3d3d3d;
+  --color-or-text: #3d3d3d;
+  --color-or-cream: #f7f5f0;
+  --color-or-grey-lighter: #e5e0d6;
 }
 
 @media (prefers-color-scheme: dark) {

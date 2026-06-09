@@ -1,0 +1,90 @@
+import Link from 'next/link';
+import { PrestaProduct, getProductImageUrl } from '@/lib/presta';
+import ProductPlayButton from './ProductPlayButton';
+import ProductBadges from './ProductBadges';
+
+interface Props {
+  product: PrestaProduct;
+}
+
+export default function ProductCard({ product }: Props) {
+  const imageUrl = product.idDefaultImage
+    ? getProductImageUrl(product.id, product.idDefaultImage)
+    : '';
+  const productLink = `/produit/${product.id}`;
+
+  return (
+    <article className="product-card" style={{ background: '#fff', border: '1px solid var(--or-grey-lighter)', borderRadius: 4, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ position: 'relative', aspectRatio: '1', background: 'var(--or-bg-soft)' }}>
+        <Link href={productLink} style={{ display: 'block', width: '100%', height: '100%' }}>
+          {imageUrl ? <img src={imageUrl} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} /> : null}
+        </Link>
+        <div className="product-card-hover-eye" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7z" fill="#fff" stroke="#3f6e51" strokeWidth="2" strokeLinejoin="round"/>
+            <circle cx="12" cy="12" r="4.5" fill="#3f6e51"/>
+            <circle cx="10.4" cy="11.6" r="1.8" fill="#fff" opacity="0.95"/>
+            <circle cx="11.4" cy="12.4" r="1.8" fill="#3f6e51"/>
+          </svg>
+        </div>
+        <ProductBadges product={product} />
+      </div>
+
+      <div style={{ padding: '12px 12px 8px', display: 'flex', flexDirection: 'column', gap: 4, borderTop: '1px solid var(--or-grey-lighter)', flex: 1 }}>
+        <Link href={productLink} style={{ textDecoration: 'none', color: 'var(--or-text)' }}>
+          <h3 style={{ fontSize: 13, margin: 0, fontWeight: 500, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+            {product.name}
+          </h3>
+        </Link>
+        {product.reference ? <p style={{ fontSize: 11, color: 'var(--or-text-muted)', margin: 0 }}>Réf : {product.reference}</p> : null}
+      </div>
+
+      <div style={{
+        borderTop: '1px solid var(--or-grey-lighter)',
+        padding: '8px 10px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        background: '#f1f1f1',
+      }}>
+        <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--or-text)', margin: 0, flex: 1 }}>
+          {Number(product.price).toFixed(2)} €
+        </p>
+        <ProductPlayButton
+          productId={product.id}
+          productName={product.name}
+          productLink={productLink}
+          coverUrl={imageUrl}
+          size={42}
+          variant="inline"
+        />
+        <button
+          type="button"
+          aria-label="Ajouter au panier"
+          title="Ajouter au panier"
+          className="product-card-cart-btn"
+          style={{
+            width: 42, height: 42,
+            background: '#a3a2a2',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 6,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 0,
+            transition: 'background 0.25s ease',
+          }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M6 6h15l-2 9H8L6 6z" />
+            <path d="M6 6l-1.5-2" />
+            <circle cx="9" cy="19" r="1" />
+            <circle cx="18" cy="19" r="1" />
+          </svg>
+        </button>
+      </div>
+    </article>
+  );
+}

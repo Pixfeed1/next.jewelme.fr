@@ -1,0 +1,178 @@
+import type { Locale } from './locale-context';
+
+export const translations = {
+  fr: {
+    // Header
+    login: 'Connexion',
+    search: 'Rechercher',
+    // Cart / Panier
+    cart: 'Panier',
+    your_cart: 'Mon panier',
+    empty_cart: 'Votre panier est vide.',
+    continue_shopping: 'Continuer mes achats',
+    order: 'Commander',
+    voucher_question: 'Vous avez un code promo ?',
+    enter_voucher: 'Entrez votre code',
+    apply: 'Appliquer',
+    remove: 'retirer',
+    subtotal: 'Sous-total',
+    cross_sell_title: 'Acheté en même temps',
+    shipping: 'Livraison',
+    free: 'gratuit',
+    discount: 'Réduction',
+    total_ttc: 'Total TTC',
+    tax_included: 'TVA incluse plus frais d\'envoi',
+    cart_count_singular: 'Il y a 1 article dans votre panier.',
+    cart_count_plural: 'Il y a {{n}} articles dans votre panier.',
+    // Checkout
+    your_info: 'Vos informations',
+    address: 'Adresse',
+    delivery: 'Livraison',
+    payment: 'Paiement',
+    guest_checkout: 'Vous commandez en tant qu\'invité (aucun compte requis).',
+    continue: 'Continuer',
+    place_order: 'Valider la commande',
+    accept_cgv: 'J\'accepte les conditions générales de vente',
+    // Footer
+    information: 'Informations',
+    call_us: 'Appelez-nous',
+    email_us: 'Envoyez-nous un e-mail',
+    newsletter: 'Lettre d\'informations',
+    unsubscribe_anytime: 'Vous pouvez vous desinscrire a tout moment.',
+    subscribe: 'S\'abonner',
+    your_email: 'Votre adresse e-mail',
+    all_rights_reserved: 'Tous droits reserves',
+    headless_poc_by: 'Front headless POC par',
+    subject: 'Sujet',
+    email_address: 'Adresse e-mail',
+    attached_document: 'Document joint',
+    message_label: 'Message',
+    your_email_placeholder: 'votre@email.com',
+    how_can_we_help: 'Comment pouvons-nous aider ?',
+    send: 'ENVOYER',
+    sending: 'Envoi...',
+    optional: 'Facultatif',
+    contact_success: 'Votre message a bien ete envoye. Nous vous repondrons dans les plus brefs delais.',
+    send_error: 'Erreur lors de l\'envoi',
+    network_error: 'Erreur reseau',
+    product_singular: 'produit',
+    in_this_category: 'dans cette categorie',
+    page_word: 'page',
+    no_products_on_page: 'Aucun produit actif sur cette page.',
+    // Misc
+    home: 'Accueil',
+    contact: 'Contact',
+    contact_us: 'Contactez-nous',
+    products: 'Produits',
+    back_to_shop: 'Retour à la boutique',
+    sort_by: 'Trier par',
+    sort_relevance: 'Pertinence',
+    sort_name_asc: 'Nom, A à Z',
+    sort_name_desc: 'Nom, Z à A',
+    sort_price_asc: 'Prix, croissant',
+    sort_price_desc: 'Prix, décroissant',
+    view: 'Vue',
+    view_grid: 'Grille',
+    view_list: 'Liste',
+    view_table: 'Table',
+    filters: 'Filtres',
+    clear_all: 'Tout effacer',
+  },
+  en: {
+    login: 'Sign in',
+    search: 'Search',
+    cart: 'Cart',
+    your_cart: 'My cart',
+    empty_cart: 'Your cart is empty.',
+    continue_shopping: 'Continue shopping',
+    order: 'Checkout',
+    voucher_question: 'Have a promo code?',
+    enter_voucher: 'Enter your code',
+    apply: 'Apply',
+    remove: 'remove',
+    subtotal: 'Subtotal',
+    cross_sell_title: 'Frequently bought together',
+    shipping: 'Shipping',
+    free: 'free',
+    discount: 'Discount',
+    total_ttc: 'Total',
+    tax_included: 'Tax included, shipping fees',
+    cart_count_singular: 'There is 1 item in your cart.',
+    cart_count_plural: 'There are {{n}} items in your cart.',
+    your_info: 'Your information',
+    address: 'Address',
+    delivery: 'Shipping',
+    payment: 'Payment',
+    guest_checkout: 'You are ordering as a guest (no account required).',
+    continue: 'Continue',
+    place_order: 'Place order',
+    accept_cgv: 'I accept the terms and conditions of sale',
+    information: 'Information',
+    call_us: 'Call us',
+    email_us: 'Email us',
+    newsletter: 'Newsletter',
+    unsubscribe_anytime: 'You can unsubscribe at any time.',
+    subscribe: 'Subscribe',
+    your_email: 'Your email address',
+    all_rights_reserved: 'All rights reserved',
+    headless_poc_by: 'Headless front POC by',
+    subject: 'Subject',
+    email_address: 'Email address',
+    attached_document: 'Attached file',
+    message_label: 'Message',
+    your_email_placeholder: 'your@email.com',
+    how_can_we_help: 'How can we help?',
+    send: 'SEND',
+    sending: 'Sending...',
+    optional: 'Optional',
+    contact_success: 'Your message has been sent. We will reply as soon as possible.',
+    send_error: 'An error occurred while sending',
+    network_error: 'Network error',
+    product_singular: 'product',
+    in_this_category: 'in this category',
+    page_word: 'page',
+    no_products_on_page: 'No active products on this page.',
+    home: 'Home',
+    contact: 'Contact',
+    contact_us: 'Contact us',
+    products: 'Products',
+    back_to_shop: 'Back to shop',
+    sort_by: 'Sort by',
+    sort_relevance: 'Relevance',
+    sort_name_asc: 'Name, A to Z',
+    sort_name_desc: 'Name, Z to A',
+    sort_price_asc: 'Price, low to high',
+    sort_price_desc: 'Price, high to low',
+    view: 'View',
+    view_grid: 'Grid',
+    view_list: 'List',
+    view_table: 'Table',
+    filters: 'Filters',
+    clear_all: 'Clear all',
+  },
+} as const;
+
+export type TranslationKey = keyof (typeof translations)['fr'];
+
+/** Server-side helper (read cookie) */
+export async function getServerT(): Promise<(key: TranslationKey) => string> {
+  const { cookies, headers } = await import('next/headers');
+  const h = await headers();
+  const headerLocale = h.get('x-locale');
+  let locale: Locale = 'fr';
+  if (headerLocale === 'en') locale = 'en';
+  else if (headerLocale === 'fr') locale = 'fr';
+  else {
+    const c = await cookies();
+    locale = (c.get('locale')?.value === 'en' ? 'en' : 'fr') as Locale;
+  }
+  return (key: TranslationKey) => translations[locale][key] ?? key;
+}
+
+/** Client hook */
+export function useT(): (key: TranslationKey) => string {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { useLocale } = require('./locale-context');
+  const { locale } = useLocale();
+  return (key: TranslationKey) => translations[locale as Locale][key] ?? key;
+}
