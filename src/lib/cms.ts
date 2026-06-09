@@ -1,11 +1,13 @@
 import { getServerIdLang } from './server-locale';
+import { decodeHtmlEntities } from './text-utils';
 
-function extractAllLangValues(field: unknown): Record<string, string> {
-  if (typeof field === 'string') return { '1': field };
+function extractAllLangValues(field: unknown, decode = false): Record<string, string> {
+  const dec = (s: string) => (decode ? decodeHtmlEntities(s) : s);
+  if (typeof field === 'string') return { '1': dec(field) };
   if (Array.isArray(field)) {
     const out: Record<string, string> = {};
     for (const f of field as Array<{ id: string; value: string }>) {
-      out[String(f.id)] = String(f.value || '');
+      out[String(f.id)] = dec(String(f.value || ''));
     }
     return out;
   }
@@ -43,10 +45,10 @@ function extractLangValue(field: unknown, idLang = 1): string {
 }
 
 function normalize(raw: Record<string, unknown>): CmsPage {
-  const titleByLang = extractAllLangValues(raw.meta_title);
-  const metaTitleByLang = extractAllLangValues(raw.head_seo_title);
-  const metaDescriptionByLang = extractAllLangValues(raw.meta_description);
-  const contentByLang = extractAllLangValues(raw.content);
+  const titleByLang = extractAllLangValues(raw.meta_title, true);
+  const metaTitleByLang = extractAllLangValues(raw.head_seo_title, true);
+  const metaDescriptionByLang = extractAllLangValues(raw.meta_description, true);
+  const contentByLang = extractAllLangValues(raw.content); // HTML rendu via dangerouslySetInnerHTML : ne pas décoder
   return {
     id: parseInt(String(raw.id), 10),
     title: titleByLang['1'] || '',

@@ -4,6 +4,7 @@
  * @author PixFeed - Marc Gueffie
  */
 import { getServerIdLang } from './server-locale';
+import { decodeHtmlEntities } from './text-utils';
 
 const PRESTA_BASE = (process.env.PRESTA_API_URL || 'https://test4.jewelme.fr/api').replace(/\/api\/?$/, '');
 const API_KEY = process.env.PRESTA_API_KEY || '5KC84V1MI8YJR54U4HSZWFK4IQG2RS28';
@@ -61,7 +62,15 @@ export async function fetchHomeStructure(): Promise<HomeStructure> {
       console.error('[Headless API] fetchHomeStructure HTTP', res.status);
       return emptyStructure(`HTTP ${res.status}`);
     }
-    return await res.json();
+    const data: HomeStructure = await res.json();
+    // Décode les titres affichés (blocs + onglets)
+    for (const block of data.blocks ?? []) {
+      if (block.title) block.title = decodeHtmlEntities(block.title);
+      for (const tab of block.tabs ?? []) {
+        if (tab.title) tab.title = decodeHtmlEntities(tab.title);
+      }
+    }
+    return data;
   } catch (err) {
     console.error('[Headless API] fetchHomeStructure error:', err);
     return emptyStructure(String(err));

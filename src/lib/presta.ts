@@ -4,6 +4,8 @@
  * @author PixFeed - Marc Gueffie
  */
 
+import { decodeHtmlEntities } from './text-utils';
+
 const API_URL = process.env.PRESTA_API_URL || 'https://test4.jewelme.fr/api';
 const API_KEY = process.env.PRESTA_API_KEY || '5KC84V1MI8YJR54U4HSZWFK4IQG2RS28';
 
@@ -122,12 +124,12 @@ function normalizeProduct(raw: Record<string, unknown>, taxRates: { default_rate
   const images = assocImages.map((img) => parseInt(String(img.id), 10)).filter((id) => id > 0);
   return {
     id: parseInt(String(raw.id), 10),
-    name: extractLangValue(raw.name),
+    name: decodeHtmlEntities(extractLangValue(raw.name)),
     price: parseFloat(String(raw.price ?? '0')),
     idTaxRulesGroup: parseInt(String(raw.id_tax_rules_group ?? '0'), 10),
     priceWt: applyTaxRate(parseFloat(String(raw.price ?? '0')), parseInt(String(raw.id_tax_rules_group ?? '0'), 10), taxRates),
-    reference: String(raw.reference ?? ''),
-    descriptionShort: stripHtml(extractLangValue(raw.description_short)),
+    reference: decodeHtmlEntities(String(raw.reference ?? '')),
+    descriptionShort: decodeHtmlEntities(stripHtml(extractLangValue(raw.description_short))),
     description: extractLangValue(raw.description),
     active: String(raw.active) === '1',
     idCategoryDefault: parseInt(String(raw.id_category_default ?? '0'), 10),
@@ -143,15 +145,15 @@ function normalizeProduct(raw: Record<string, unknown>, taxRates: { default_rate
       return days >= 0 && days < 60;
     })(),
     images,
-    manufacturerName: String(raw.manufacturer_name ?? ''),
+    manufacturerName: decodeHtmlEntities(String(raw.manufacturer_name ?? '')),
     idManufacturer: parseInt(String(raw.id_manufacturer ?? '0'), 10),
     manufacturerLinkRewrite: '',
     linkRewrite: extractLangValue(raw.link_rewrite),
     categorySlug: '',
     quantity: parseInt(String(raw.quantity ?? '0'), 10),
-    metaTitle: extractLangValue(raw.meta_title),
-    metaDescription: extractLangValue(raw.meta_description),
-    metaKeywords: extractLangValue(raw.meta_keywords),
+    metaTitle: decodeHtmlEntities(extractLangValue(raw.meta_title)),
+    metaDescription: decodeHtmlEntities(extractLangValue(raw.meta_description)),
+    metaKeywords: decodeHtmlEntities(extractLangValue(raw.meta_keywords)),
     condition: (() => {
       const c = String(raw.condition ?? '').toLowerCase();
       if (c === 'new') return 'Neuf';
@@ -166,11 +168,11 @@ function normalizeProduct(raw: Record<string, unknown>, taxRates: { default_rate
 function normalizeCategory(c: Record<string, unknown>): PrestaCategory {
   return {
     id: parseInt(String(c.id), 10),
-    name: extractLangValue(c.name),
+    name: decodeHtmlEntities(extractLangValue(c.name)),
     linkRewrite: extractLangValue(c.link_rewrite),
-    metaTitle: extractLangValue(c.meta_title),
-    metaDescription: extractLangValue(c.meta_description),
-    metaKeywords: extractLangValue(c.meta_keywords),
+    metaTitle: decodeHtmlEntities(extractLangValue(c.meta_title)),
+    metaDescription: decodeHtmlEntities(extractLangValue(c.meta_description)),
+    metaKeywords: decodeHtmlEntities(extractLangValue(c.meta_keywords)),
     idParent: parseInt(String(c.id_parent ?? '0'), 10),
     levelDepth: parseInt(String(c.level_depth ?? '0'), 10),
     active: String(c.active) === '1',
@@ -230,8 +232,8 @@ async function fetchProductFeatures(
         const fData = fRes.ok ? await fRes.json() : null;
         const vData = vRes.ok ? await vRes.json() : null;
         return {
-          name: extractLangValue(fData?.product_feature?.name),
-          value: extractLangValue(vData?.product_feature_value?.value),
+          name: decodeHtmlEntities(extractLangValue(fData?.product_feature?.name)),
+          value: decodeHtmlEntities(extractLangValue(vData?.product_feature_value?.value)),
         };
       } catch {
         return { name: '', value: '' };
@@ -484,14 +486,14 @@ export async function fetchManufacturer(id: number, language: number = 1): Promi
     if (!raw) return null;
     return {
       id: parseInt(String(raw.id), 10),
-      name: String(raw.name ?? ''),
+      name: decodeHtmlEntities(String(raw.name ?? '')),
       linkRewrite: String(raw.link_rewrite ?? ''),
       description: extractLangValue(raw.description),
-      shortDescription: extractLangValue(raw.short_description),
+      shortDescription: decodeHtmlEntities(extractLangValue(raw.short_description)),
       active: String(raw.active) === '1',
-      metaTitle: extractLangValue(raw.meta_title),
-      metaDescription: extractLangValue(raw.meta_description),
-      metaKeywords: extractLangValue(raw.meta_keywords),
+      metaTitle: decodeHtmlEntities(extractLangValue(raw.meta_title)),
+      metaDescription: decodeHtmlEntities(extractLangValue(raw.meta_description)),
+      metaKeywords: decodeHtmlEntities(extractLangValue(raw.meta_keywords)),
     };
   } catch (e) {
     console.error('[fetchManufacturer] failed:', e);
@@ -541,12 +543,12 @@ export async function fetchSupplier(id: number, language: number = 1): Promise<P
     if (!raw) return null;
     return {
       id: parseInt(String(raw.id), 10),
-      name: String(raw.name ?? ''),
+      name: decodeHtmlEntities(String(raw.name ?? '')),
       linkRewrite: String(raw.link_rewrite ?? ''),
       description: extractLangValue(raw.description),
       active: String(raw.active) === '1',
-      metaTitle: extractLangValue(raw.meta_title),
-      metaDescription: extractLangValue(raw.meta_description),
+      metaTitle: decodeHtmlEntities(extractLangValue(raw.meta_title)),
+      metaDescription: decodeHtmlEntities(extractLangValue(raw.meta_description)),
     };
   } catch (e) {
     console.error('[fetchSupplier] failed:', e);
