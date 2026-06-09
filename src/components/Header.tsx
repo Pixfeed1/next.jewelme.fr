@@ -16,7 +16,7 @@ const itemLabelStyle: React.CSSProperties = {
   padding: '12px 14px',
   color: '#1a1a1a',
   textDecoration: 'none',
-  fontSize: 11,
+  fontSize: 13,
   fontWeight: 700,
   textTransform: 'uppercase',
   letterSpacing: '0.5px',
