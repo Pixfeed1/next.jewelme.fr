@@ -57,12 +57,17 @@ export default function FilterSidebar({ groups }: Props) {
     });
   };
 
-  const toggle = (groupType: string, value: string | number) => {
+  // Toggle d'une valeur de filtre. Une feature_value Presta peut être dupliquée
+  // en BDD (plusieurs ids pour le même libellé) : on (dé)sélectionne TOUS les ids
+  // du groupe d'un coup, sinon le filtre ne matche qu'une partie des produits.
+  const toggle = (groupType: string, ids: (string | number)[]) => {
     setSelected(prev => {
       const arr = (prev[groupType] ?? []).map(String);
-      const v = String(value);
-      const exists = arr.includes(v);
-      const next = exists ? arr.filter(x => x !== v) : [...arr, v];
+      const idsStr = ids.map(String);
+      const allPresent = idsStr.every(id => arr.includes(id));
+      const next = allPresent
+        ? arr.filter(x => !idsStr.includes(x))            // déselectionne tous les ids
+        : Array.from(new Set([...arr, ...idsStr]));        // ajoute tous les ids
       const updated = { ...prev, [groupType]: next };
       pushFilters(updated);
       return updated;
@@ -111,11 +116,14 @@ export default function FilterSidebar({ groups }: Props) {
             {isOpen && (
               <div style={{ marginTop: 10, maxHeight: 280, overflowY: 'auto' }}>
                 {group.values.map((v: FilterValue) => {
-                  const isSelected = (selected[group.type] ?? []).map(String).includes(String(v.id));
+                  const ids = v.ids && v.ids.length > 0 ? v.ids : [v.id];
+                  const arr = (selected[group.type] ?? []).map(String);
+                  // coché seulement si TOUS les ids du groupe sont sélectionnés
+                  const isSelected = ids.every(id => arr.includes(String(id)));
                   return (
                     <label key={String(v.id)}
                       style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', cursor: 'pointer', fontSize: 13, color: isSelected ? '#333' : '#666' }}>
-                      <input type="checkbox" checked={isSelected} onChange={() => toggle(group.type, v.id)}
+                      <input type="checkbox" checked={isSelected} onChange={() => toggle(group.type, ids)}
                         style={{ accentColor: '#333', cursor: 'pointer' }} />
                       <span style={{ flex: 1, fontWeight: isSelected ? 600 : 400 }}>{v.name}</span>
                       <span style={{ color: '#aaa', fontSize: 11 }}>({v.count})</span>

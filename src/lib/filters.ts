@@ -7,6 +7,8 @@ const API_KEY = process.env.PRESTA_API_KEY || '';
 
 export interface FilterValue {
   id: number | string;
+  /** ids complets de la feature_value (Presta peut la dupliquer en BDD) */
+  ids?: number[];
   name: string;
   count: number;
   min?: number;
