@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useLocale, LOCALES } from '@/lib/locale-context';
 import { categoryUrl, manufacturerUrl, localeHref } from '@/lib/url-builder';
 import { mapPrestaUrl } from '@/lib/presta-url-mapper';
+import { useAuth } from '@/lib/auth-context';
+import { useT } from '@/lib/i18n';
 import type { MegaMenuEntry } from '@/lib/megamenu';
 
 interface Props {
@@ -16,6 +18,8 @@ export default function MobileMenuDrawer({ entries, locale, loginLabel }: Props)
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null);
   const { locale: currentLocale, setLocale: setLocaleCtx } = useLocale();
+  const { user, logout } = useAuth();
+  const t = useT();
 
   useEffect(() => {
     if (open) {
@@ -58,10 +62,23 @@ export default function MobileMenuDrawer({ entries, locale, loginLabel }: Props)
         </form>
 
         <nav className="mobile-menu-nav">
-          <Link href={localeHref('/connexion', locale)} onClick={close} className="mobile-menu-link mobile-menu-account">
-            <i className="material-icons">person</i>
-            <span>{loginLabel}</span>
-          </Link>
+          {user ? (
+            <>
+              <Link href={localeHref('/mon-compte', locale)} onClick={close} className="mobile-menu-link mobile-menu-account">
+                <i className="material-icons">person</i>
+                <span>{t('account_hello')} {user.firstname}</span>
+              </Link>
+              <button type="button" className="mobile-menu-link" onClick={async () => { await logout(); close(); }}
+                style={{ background: 'none', border: 0, width: '100%', textAlign: 'left', cursor: 'pointer', color: '#bf1212' }}>
+                {t('logout')}
+              </button>
+            </>
+          ) : (
+            <Link href={localeHref('/connexion', locale)} onClick={close} className="mobile-menu-link mobile-menu-account">
+              <i className="material-icons">person</i>
+              <span>{loginLabel}</span>
+            </Link>
+          )}
 
           <div className="mobile-menu-divider" />
 

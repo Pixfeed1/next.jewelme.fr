@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { PlayerProvider } from '@/lib/player-context';
 import { CartProvider } from '@/lib/cart-context';
+import { AuthProvider } from '@/lib/auth-context';
 import CartSidePanel from '@/components/CartSidePanel';
 import { cookies } from 'next/headers';
 import { LocaleProvider, type Locale } from '@/lib/locale-context';
@@ -46,17 +47,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body style={{ margin: 0 }}>
         <LocaleProvider initialLocale={initialLocale}>
-          <CartProvider>
-            <PlayerProvider>
-              <Header />
-              <main style={{ width: '100%', maxWidth: 1650, margin: '0 auto', padding: '24px 32px' }}>
-                {children}
-              </main>
-              <Footer />
-              <PersistentPlayer />
-            </PlayerProvider>
-            <CartSidePanel />
-          </CartProvider>
+          <AuthProvider>
+            <CartProvider>
+              <PlayerProvider>
+                <Header />
+                <main style={{ width: '100%', maxWidth: 1650, margin: '0 auto', padding: '24px 32px' }}>
+                  {children}
+                </main>
+                <Footer />
+                <PersistentPlayer />
+              </PlayerProvider>
+              <CartSidePanel />
+            </CartProvider>
+          </AuthProvider>
         </LocaleProvider>
         {gaId && <GoogleAnalytics gaId={gaId} />}
         <BrevoChat />
