@@ -180,12 +180,12 @@ export default function CartPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
               {/* 1. Connexion (client existant) — outline principal */}
-              <Link href={`${localeHref('/connexion', locale)}?redirect=${encodeURIComponent(localeHref('/checkout', locale))}`}
+              <Link href={`${localeHref('/connexion', locale)}?from=${encodeURIComponent(localeHref('/checkout', locale))}`}
                 style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '11px 28px', color: '#3f6e51', background: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', border: '2px solid #3f6e51', borderRadius: 4, minWidth: 280 }}>
                 {locale === 'en' ? 'I already have an account' : 'J\'ai déjà un compte'}
               </Link>
               {/* 2. Création de compte — outline secondaire */}
-              <Link href={`${localeHref('/inscription', locale)}?redirect=${encodeURIComponent(localeHref('/checkout', locale))}`}
+              <Link href={`${localeHref('/inscription', locale)}?from=${encodeURIComponent(localeHref('/checkout', locale))}`}
                 style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 28px', color: 'var(--or-text)', background: '#f0f0f0', textDecoration: 'none', fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', border: '1px solid #ddd', borderRadius: 4, minWidth: 280 }}>
                 {locale === 'en' ? 'Create an account' : 'Créer un compte'}
               </Link>

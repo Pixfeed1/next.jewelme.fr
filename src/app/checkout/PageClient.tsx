@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { homeUrl, localeHref, cmsUrl } from '@/lib/url-builder';
 import { useCart } from '@/lib/cart-context';
+import { useAuth } from '@/lib/auth-context';
 import { useLocale } from '@/lib/locale-context';
 import { trackBeginCheckout } from '@/lib/gtag';
 import { useT } from '@/lib/i18n';
@@ -42,6 +43,7 @@ export default function CheckoutPage() {
   const { locale } = useLocale();
   const t = useT();
   const { cart, refresh } = useCart();
+  const { user } = useAuth();
 
   // GA4 : begin_checkout
   useEffect(() => {
@@ -101,6 +103,15 @@ export default function CheckoutPage() {
 
   // Refresh cart on mount
   useEffect(() => { refresh(); }, []);
+
+  // Pré-remplit l'étape 1 si le client est connecté
+  useEffect(() => {
+    if (user) {
+      setEmail(user.email);
+      setFirstname(user.firstname);
+      setLastname(user.lastname);
+    }
+  }, [user]);
 
   // Load carriers when entering step 3
   useEffect(() => {
@@ -272,10 +283,12 @@ export default function CheckoutPage() {
           {step === 1 && (
             <section style={sectionStyle}>
               <h2 style={h2Style}>{t('your_info')}</h2>
-              <div style={{ padding: '10px 14px', background: '#f5f0e8', border: '1px solid #e5e0d6', borderRadius: 3, marginBottom: 16, fontSize: 13, color: '#666' }}>
-                <i className="material-icons" style={{ fontSize: 16, verticalAlign: 'middle', marginRight: 6 }}>info_outline</i>
-                {t('guest_checkout')}
-              </div>
+              {!user && (
+                <div style={{ padding: '10px 14px', background: '#f5f0e8', border: '1px solid #e5e0d6', borderRadius: 3, marginBottom: 16, fontSize: 13, color: '#666' }}>
+                  <i className="material-icons" style={{ fontSize: 16, verticalAlign: 'middle', marginRight: 6 }}>info_outline</i>
+                  {t('guest_checkout')}
+                </div>
+              )}
               <FormField label="Email *" type="email" value={email} onChange={setEmail} placeholder="vous@exemple.fr" />
               <div className="checkout-form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <FormField label="Prénom *" value={firstname} onChange={setFirstname} />

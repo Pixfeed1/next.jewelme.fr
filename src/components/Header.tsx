@@ -9,6 +9,7 @@ import { categoryUrl, manufacturerUrl, homeUrl, localeHref } from '@/lib/url-bui
 import CartBadge from './CartBadge';
 import LocaleSwitcher from './LocaleSwitcher';
 import MobileMenuDrawer from './MobileMenuDrawer';
+import AccountMenu from './AccountMenu';
 
 const itemLabelStyle: React.CSSProperties = {
   display: 'inline-flex',
@@ -61,10 +62,7 @@ export default async function Header() {
           </div>
 
           <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: 16, justifyContent: 'flex-end' }}>
-            <a href={localeHref('/connexion', locale)} className="header-action-link" style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#fff', fontSize: 13, textDecoration: 'none', whiteSpace: 'nowrap' }}>
-              <i className="material-icons" style={{ fontSize: 22 }}>person</i>
-              <span>{t('login')}</span>
-            </a>
+            <AccountMenu />
             <CartBadge />
             <LocaleSwitcher />
           </div>

@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 const PRESTA_API_URL = process.env.PRESTA_API_URL || 'https://www.onlyroots-reggae.com';
@@ -16,6 +17,8 @@ export async function POST(req: NextRequest) {
     if (!id_cart) {
       return NextResponse.json({ success: false, error: 'Missing id_cart' }, { status: 400 });
     }
+    const cookieStore = await cookies();
+    const secureKey = cookieStore.get('pixfeed_auth')?.value;
     const params = new URLSearchParams({
       fc: 'module',
       module: 'pixfeed_headless_api',
@@ -26,6 +29,7 @@ export async function POST(req: NextRequest) {
       id_address_invoice: String(id_address_invoice ?? id_address_delivery ?? ''),
       id_carrier: String(id_carrier ?? ''),
       ws_key: PRESTA_API_KEY,
+      ...(secureKey ? { secure_key: secureKey } : {}),
     });
     const r = await fetch(`${BASE}/index.php?${params.toString()}`, { cache: 'no-store' });
     const data = await r.json();
