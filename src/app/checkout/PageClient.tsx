@@ -9,6 +9,10 @@ import { trackBeginCheckout } from '@/lib/gtag';
 import { useT } from '@/lib/i18n';
 import { getProductImageUrl } from '@/lib/presta';
 import VoucherForm from '@/components/VoucherForm';
+import PaymentMethodSelector, { type PaymentOption } from '@/components/PaymentMethodSelector';
+import PayboxRedirectForm from '@/components/PayboxRedirectForm';
+
+const PAYBOX_ID = 'paybox';
 
 interface Country { id: number; iso: string; name: string; need_zip_code: boolean; zip_format: string; contains_states: boolean; }
 interface PaymentMethod { id: string; name: string; label: string; instructions: string; }
@@ -75,10 +79,12 @@ export default function CheckoutPage() {
   const [message, setMessage] = useState('');
 
   // Step 4 - payment
-  const [paymentMethod, setPaymentMethod] = useState<string>('');
+  const [paymentMethod, setPaymentMethod] = useState<string>(PAYBOX_ID);
   const [acceptCgv, setAcceptCgv] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  // Paybox : redirection vers la page de paiement sécurisée
+  const [payboxData, setPayboxData] = useState<{ url: string; fields: Record<string, string | number> } | null>(null);
 
   const fmt = (n: number) => n.toFixed(2).replace('.', ',') + '\u00a0€';
 
@@ -88,7 +94,7 @@ export default function CheckoutPage() {
       setInit(d);
       setDeliveryAddr(a => ({ ...a, id_country: d.default_country }));
       setInvoiceAddr(a => ({ ...a, id_country: d.default_country }));
-      if (d.payment_methods.length > 0) setPaymentMethod(d.payment_methods[0].id);
+      // La carte bancaire (Paybox) reste sélectionnée par défaut (~70% des commandes)
       setLoadingInit(false);
     });
   }, []);
@@ -126,23 +132,56 @@ export default function CheckoutPage() {
     setSubmitting(true);
     setSubmitError('');
     const token = localStorage.getItem('pixfeed_cart_token') || '';
+    const orderBody = {
+      token, email, firstname, lastname,
+      delivery_address: deliveryAddr,
+      use_same_address: useSameAddress,
+      billing_address: useSameAddress ? undefined : invoiceAddr,
+      id_carrier: idCarrier,
+      payment_method: paymentMethod,
+      message,
+      accept_cgv: acceptCgv,
+    };
     try {
+      // Prépare le panier côté Presta (client + adresses + transporteur attachés)
       const r = await fetch('/api/checkout/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token, email, firstname, lastname,
-          delivery_address: deliveryAddr,
-          use_same_address: useSameAddress,
-          billing_address: useSameAddress ? undefined : invoiceAddr,
-          id_carrier: idCarrier,
-          payment_method: paymentMethod,
-          message,
-          accept_cgv: acceptCgv,
-        }),
+        body: JSON.stringify(orderBody),
       });
       const data = await r.json();
-      if (r.ok && data.success) {
+      if (!r.ok || data.success === false || data.error) {
+        setSubmitError(data.error || 'Erreur lors de la commande');
+        setSubmitting(false);
+        return;
+      }
+
+      // === Carte bancaire (Paybox) : redirection vers le paiement sécurisé ===
+      if (paymentMethod === PAYBOX_ID) {
+        const initRes = await fetch('/api/paybox/init', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id_cart: data.id_cart ?? data.cart_id ?? cart?.id_cart,
+            id_customer: data.id_customer ?? data.customer_id,
+            id_address_delivery: data.id_address_delivery ?? data.id_address,
+            id_address_invoice: data.id_address_invoice ?? data.id_address_delivery ?? data.id_address,
+            id_carrier: idCarrier,
+          }),
+        });
+        const initData = await initRes.json();
+        if (initRes.ok && initData.success && initData.url && initData.fields) {
+          // Le formulaire caché s'auto-soumet vers Paybox (loader bloquant affiché)
+          setPayboxData({ url: initData.url, fields: initData.fields });
+          return; // on reste en submitting → loader affiché jusqu'à la redirection
+        }
+        setSubmitError(initData.error || 'Erreur lors de l\'initialisation du paiement');
+        setSubmitting(false);
+        return;
+      }
+
+      // === Virement bancaire (comportement inchangé) ===
+      if (data.success && data.reference) {
         localStorage.removeItem('pixfeed_cart_token');
         router.push(localeHref(`/confirmation/${data.reference}`, locale));
       } else {
@@ -168,9 +207,20 @@ export default function CheckoutPage() {
   }
 
   const stepLabels = [t('your_info'), t('address'), t('delivery'), t('payment')];
+  const payboxLoading = submitting && paymentMethod === PAYBOX_ID;
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 16px' }}>
+      {/* Loader bloquant pendant l'init Paybox + la redirection */}
+      {payboxLoading && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, background: 'rgba(255,255,255,0.92)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}
+             role="status" aria-live="polite">
+          <div className="orp-spinner" style={{ width: 44, height: 44, border: '4px solid #e5e0d6', borderTopColor: '#3f6e51', borderRadius: '50%', animation: 'spin 0.9s linear infinite' }} />
+          <p style={{ fontSize: 15, color: '#333', fontWeight: 600, textAlign: 'center', maxWidth: 320 }}>{t('redirecting_payment')}</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      )}
+      {payboxData && <PayboxRedirectForm url={payboxData.url} fields={payboxData.fields} />}
       <p style={{ marginBottom: 20, fontSize: 13, color: '#888' }}>
         <Link href={homeUrl(locale)} style={{ color: '#888', textDecoration: 'none' }}>Accueil</Link>
         <span style={{ margin: '0 8px' }}>›</span>
@@ -309,23 +359,14 @@ export default function CheckoutPage() {
           {step === 4 && init && (
             <section style={sectionStyle}>
               <h2 style={h2Style}>{t('payment')}</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                {init.payment_methods.map(m => (
-                  <label key={m.id} style={{
-                    display: 'block', padding: 16,
-                    border: paymentMethod === m.id ? '2px solid #a3a2a2' : '1px solid #e5e0d6',
-                    borderRadius: 4, cursor: 'pointer', background: paymentMethod === m.id ? '#f0f7f2' : '#fff',
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <input type="radio" name="payment" checked={paymentMethod === m.id} onChange={() => setPaymentMethod(m.id)} />
-                      <strong style={{ fontSize: 14 }}>{m.label}</strong>
-                    </div>
-                    {paymentMethod === m.id && m.instructions && (
-                      <p style={{ marginTop: 8, marginLeft: 28, fontSize: 13, color: '#666', lineHeight: 1.5 }}>{m.instructions}</p>
-                    )}
-                  </label>
-                ))}
-              </div>
+              <PaymentMethodSelector
+                options={[
+                  { id: PAYBOX_ID, label: t('payment_card'), note: t('payment_card_secure'), card: true },
+                  ...init.payment_methods.map((m): PaymentOption => ({ id: m.id, label: m.label, note: m.instructions })),
+                ]}
+                selected={paymentMethod}
+                onSelect={setPaymentMethod}
+              />
 
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 24, fontSize: 13, cursor: 'pointer' }}>
                 <input type="checkbox" checked={acceptCgv} onChange={e => setAcceptCgv(e.target.checked)} style={{ marginTop: 3 }} />
@@ -351,7 +392,9 @@ export default function CheckoutPage() {
                     cursor: validStep4 && !submitting ? 'pointer' : 'not-allowed',
                     fontSize: 14, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em',
                   }}>
-                  {submitting ? t('place_order') + '…' : t('place_order')}
+                  {submitting
+                    ? (paymentMethod === PAYBOX_ID ? t('redirecting_payment') : t('place_order') + '…')
+                    : (paymentMethod === PAYBOX_ID ? t('pay_by_card') : t('place_order'))}
                 </button>
               </div>
             </section>
