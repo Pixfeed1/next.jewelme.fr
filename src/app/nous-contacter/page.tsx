@@ -14,13 +14,13 @@ export default async function ContactPage() {
   const t = await getServerT();
   const [info, subjects] = await Promise.all([fetchContactInfo(), fetchContactSubjects()]);
   return (
-    <div style={{ maxWidth: 1280, paddingLeft: 32, paddingRight: 16 }}>
+    <div className="contact-page" style={{ maxWidth: 1280 }}>
       <p style={{ marginBottom: 24, fontSize: 13 }}>
         <Link href={homeUrl(locale)} style={{ color: '#888', textDecoration: 'none' }}>{t('home')}</Link>
         <span style={{ color: '#ccc', margin: '0 8px' }}>›</span>
         <span style={{ color: '#888' }}>{t('contact_us')}</span>
       </p>
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 280px) minmax(0, 1fr)', gap: 32 }}>
+      <div className="contact-layout" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 280px) minmax(0, 1fr)', gap: 32 }}>
         <aside style={{ height: 'fit-content' }}>
           <h2 style={{ fontSize: 14, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 20px', color: '#333', borderBottom: '1px solid #e5e0d6', paddingBottom: 12 }}>
             {t('information')}

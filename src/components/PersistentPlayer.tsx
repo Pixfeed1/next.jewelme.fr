@@ -1,6 +1,6 @@
 'use client';
 import { usePlayer } from '@/lib/player-context';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Waveform from './Waveform';
 import { useWaveform } from '@/lib/use-waveform';
 
@@ -18,6 +18,23 @@ export default function PersistentPlayer() {
 
   const track = state.playlist[state.currentTrack];
   const { data: waveform } = useWaveform(track?.id);
+
+  // Detection mobile (768px) pour basculer waveform -> progress bar simple
+  const [isMobilePlayer, setIsMobilePlayer] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(max-width: 768px)');
+    const update = () => setIsMobilePlayer(mq.matches);
+    update();
+    if (mq.addEventListener) {
+      mq.addEventListener('change', update);
+      return () => mq.removeEventListener('change', update);
+    } else {
+      // fallback ancien Safari
+      mq.addListener(update);
+      return () => mq.removeListener(update);
+    }
+  }, []);
 
   // Ajuste body padding-bottom selon visibility (norme SoundCloud / Spotify)
   useEffect(() => {
@@ -97,7 +114,7 @@ export default function PersistentPlayer() {
             </span>
           </div>
           <div className="orp-progress-wrap">
-            {waveform && waveform.peaks && waveform.peaks.length > 0 ? (
+            {!isMobilePlayer && waveform && waveform.peaks && waveform.peaks.length > 0 ? (
               <Waveform
                 peaks={waveform.peaks}
                 progress={state.duration > 0 ? state.currentTime / state.duration : 0}
@@ -131,6 +148,41 @@ export default function PersistentPlayer() {
             </div>
           </div>
         </div>
+        <button
+          className="orp-chat-btn"
+          type="button"
+          onClick={() => {
+            const w = window as any;
+            // Essayer plusieurs syntaxes API selon version du SDK Brevo
+            if (typeof w.BrevoConversations === 'function') {
+              w.BrevoConversations('openChat', true);
+              return;
+            }
+            if (w.BrevoConversations && typeof w.BrevoConversations.openChat === 'function') {
+              w.BrevoConversations.openChat();
+              return;
+            }
+            if (w.Brevo && typeof w.Brevo.push === 'function') {
+              w.Brevo.push(['openChat']);
+              return;
+            }
+            // Fallback : trouver et cliquer le bouton natif (s'il existe dans le DOM)
+            const launcher = document.querySelector(
+              '#brevo-conversations-icon, #brevo-conversations > button, [class*="conversations-icon"], iframe[id*="brevo-conversations-launcher"]'
+            ) as HTMLElement | null;
+            if (launcher) {
+              launcher.click();
+              return;
+            }
+            console.warn('[chat] Brevo SDK not ready or button not found');
+          }}
+          title="Discuter avec nous"
+          aria-label="Discuter avec nous"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 3.5C2 2.67 2.67 2 3.5 2h9c.83 0 1.5.67 1.5 1.5v6c0 .83-.67 1.5-1.5 1.5H7l-3 2.5V11H3.5C2.67 11 2 10.33 2 9.5v-6z" fill="currentColor"/>
+          </svg>
+        </button>
         <button className="orp-btn orp-btn-close" type="button" onClick={close} title="Fermer">
           <svg width="12" height="12" viewBox="0 0 12 12"><line x1="2" y1="2" x2="10" y2="10" stroke="currentColor" strokeWidth="1.5"/><line x1="10" y1="2" x2="2" y2="10" stroke="currentColor" strokeWidth="1.5"/></svg>
         </button>

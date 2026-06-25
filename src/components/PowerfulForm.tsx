@@ -1,10 +1,12 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import type { PowerfulForm as PwFormType, PowerfulFormField } from '@/lib/powerful-form';
+import { useT } from '@/lib/i18n';
 
 interface Props { id: number; }
 
 export default function PowerfulForm({ id }: Props) {
+  const t = useT();
   const [form, setForm] = useState<PwFormType | null>(null);
   const [loading, setLoading] = useState(true);
   const [values, setValues] = useState<Record<string, string>>({});
@@ -12,6 +14,8 @@ export default function PowerfulForm({ id }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const honeyRef = useRef<HTMLInputElement>(null);
+  const tsRef = useRef<number>(0);
 
   useEffect(() => {
     fetch(`/api/powerful-form/${id}`)
@@ -19,9 +23,10 @@ export default function PowerfulForm({ id }: Props) {
       .then(setForm)
       .finally(() => setLoading(false));
   }, [id]);
+  useEffect(() => { tsRef.current = Date.now(); }, []);
 
-  if (loading) return <p style={{ color: '#888', fontSize: 13 }}>Chargement du formulaire…</p>;
-  if (!form) return <p style={{ color: '#c00', fontSize: 13 }}>Formulaire indisponible.</p>;
+  if (loading) return <p style={{ color: '#888', fontSize: 13 }}>{t('loading_form')}</p>;
+  if (!form) return <p style={{ color: '#c00', fontSize: 13 }}>{t('form_unavailable')}</p>;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,16 +45,16 @@ export default function PowerfulForm({ id }: Props) {
       const res = await fetch('/api/powerful-form/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_form: id, values, _honey: '' }),
+        body: JSON.stringify({ id_form: id, values, _honey: honeyRef.current?.value || '', _ts: tsRef.current }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
         setSubmitted(true);
       } else {
-        setErrorMsg(data.error || "Erreur lors de l'envoi");
+        setErrorMsg(data.error || t('send_error'));
       }
     } catch {
-      setErrorMsg('Erreur reseau');
+      setErrorMsg(t('network_error'));
     } finally {
       setSubmitting(false);
     }
@@ -84,12 +89,12 @@ export default function PowerfulForm({ id }: Props) {
           />
         ))}
         {/* Honeypot anti-bot */}
-        <input type="text" name="_honey" autoComplete="off" tabIndex={-1} style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
+        <input ref={honeyRef} type="text" name="_honey" autoComplete="off" tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
 
         {errorMsg && <p style={{ color: '#d0121a', fontSize: 13, marginBottom: 12 }}>{errorMsg}</p>}
 
         <button type="submit" className="pwf-submit" disabled={submitting}>
-          {submitting ? 'Envoi…' : form.send_label}
+          {submitting ? t('sending') : form.send_label}
         </button>
       </form>
       {form.footer && (
@@ -100,6 +105,7 @@ export default function PowerfulForm({ id }: Props) {
 }
 
 function FormField({ field, value, onChange, error }: { field: PowerfulFormField; value: string; onChange: (v: string) => void; error: boolean }) {
+  const t = useT();
   if (field.type === 'separator') {
     return <hr style={{ border: 0, borderTop: '1px solid #e5e0d6', margin: '16px 0' }} />;
   }
@@ -117,7 +123,7 @@ function FormField({ field, value, onChange, error }: { field: PowerfulFormField
       ) : (
         <input className={inputClass} type={field.type === 'email' ? 'email' : 'text'} value={value} onChange={(e) => onChange(e.target.value)} />
       )}
-      {error && <span style={{ color: '#d0121a', fontSize: 12 }}>Ce champ est requis</span>}
+      {error && <span style={{ color: '#d0121a', fontSize: 12 }}>{t('field_required')}</span>}
     </div>
   );
 }

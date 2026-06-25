@@ -1,6 +1,7 @@
 'use client';
 
 import { usePlayer, Track } from '@/lib/player-context';
+import { useT } from '@/lib/i18n';
 
 const DEMO_PLAYLIST: Track[] = [
   {
@@ -16,6 +17,7 @@ const DEMO_PLAYLIST: Track[] = [
 ];
 
 export default function HomeDemoButton() {
+  const t = useT();
   const { loadPlaylist } = usePlayer();
   return (
     <div
@@ -46,9 +48,7 @@ export default function HomeDemoButton() {
           borderRadius: 4,
           fontSize: 13,
         }}
-      >
-        Lancer la démo
-      </button>
+      >{t('launch_demo')}</button>
     </div>
   );
 }

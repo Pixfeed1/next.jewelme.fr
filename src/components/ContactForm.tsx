@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useT } from '@/lib/i18n';
 import type { ContactSubject } from '@/lib/contact';
 
@@ -11,10 +11,14 @@ export default function ContactForm({ subjects }: Props) {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [submitted, setSubmitted] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const honeyRef = useRef<HTMLInputElement>(null);
+  const tsRef = useRef<number>(0);
+  useEffect(() => { tsRef.current = Date.now(); }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,14 +38,15 @@ export default function ContactForm({ subjects }: Props) {
         fd.append('id_subject', String(idSubject));
         fd.append('email', email);
         fd.append('message', message);
-        fd.append('_honey', '');
+        fd.append('_honey', honeyRef.current?.value || '');
+        fd.append('_ts', String(tsRef.current));
         fd.append('file', file);
         res = await fetch('/api/contact/submit', { method: 'POST', body: fd });
       } else {
         res = await fetch('/api/contact/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id_subject: idSubject, email, message, _honey: '' }),
+          body: JSON.stringify({ id_subject: idSubject, email, message, _honey: honeyRef.current?.value || '', _ts: tsRef.current }),
         });
       }
       const data = await res.json();
@@ -84,7 +89,43 @@ export default function ContactForm({ subjects }: Props) {
       </FormRow>
 
       <FormRow label={t('attached_document')} optional>
-        <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} style={{ fontSize: 13 }} />
+        <div className="orp-file-picker" style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            style={{ display: 'none' }}
+          />
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              padding: '8px 16px',
+              background: '#f5f0e8',
+              border: '1px solid #e5e0d6',
+              borderRadius: 4,
+              fontSize: 13,
+              fontWeight: 600,
+              color: '#555',
+              cursor: 'pointer',
+            }}
+          >
+            {t('choose_file')}
+          </button>
+          <span style={{ fontSize: 13, color: file ? '#333' : '#999' }}>
+            {file ? file.name : t('no_file_chosen')}
+          </span>
+          {file && (
+            <button
+              type="button"
+              onClick={() => { setFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+              aria-label={t('remove')}
+              style={{ padding: '2px 8px', background: 'transparent', border: 'none', color: '#bf1212', fontSize: 16, cursor: 'pointer', lineHeight: 1 }}
+            >
+              ×
+            </button>
+          )}
+        </div>
       </FormRow>
 
       <FormRow label={t('message_label')}>
@@ -92,7 +133,7 @@ export default function ContactForm({ subjects }: Props) {
       </FormRow>
 
       {/* Honeypot anti-bot */}
-      <input type="text" name="_honey" autoComplete="off" tabIndex={-1} style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
+      <input ref={honeyRef} type="text" name="_honey" autoComplete="off" tabIndex={-1} aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
 
       {errorMsg && <p style={{ color: '#d0121a', fontSize: 13, marginTop: 12 }}>{errorMsg}</p>}
 
@@ -107,7 +148,7 @@ export default function ContactForm({ subjects }: Props) {
 
 function FormRow({ label, optional, children }: { label: string; optional?: boolean; children: React.ReactNode }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: 16, alignItems: 'center', marginBottom: 18 }}>
+    <div className="contact-form-row" style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: 16, alignItems: 'center', marginBottom: 18 }}>
       <label style={{ textAlign: 'right', fontSize: 13, fontWeight: 600, color: '#555' }}>{label}</label>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <div style={{ flex: 1 }}>{children}</div>

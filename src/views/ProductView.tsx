@@ -153,6 +153,16 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
         </div>
       </div>
 
+      <section style={{ marginTop: 32, marginBottom: 32 }}>
+        <ProductSamplePlaylist
+          productId={product.id}
+          productName={product.name}
+          productLink={productUrl(product, locale)}
+          coverUrl={product.idDefaultImage ? getProductImageUrl(product.id, product.idDefaultImage) : undefined}
+          variant="list-only"
+        />
+      </section>
+
       {hasLongDescription && (
         <section style={{ marginTop: 32 }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -164,16 +174,6 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
           />
         </section>
       )}
-
-      <section style={{ marginTop: 32, marginBottom: 32 }}>
-        <ProductSamplePlaylist
-          productId={product.id}
-          productName={product.name}
-          productLink={productUrl(product, locale)}
-          coverUrl={product.idDefaultImage ? getProductImageUrl(product.id, product.idDefaultImage) : undefined}
-          variant="list-only"
-        />
-      </section>
       <ProductCrossSell productId={product.id} />
     </div>
     </>

@@ -58,7 +58,7 @@ export default async function CategoryView({ id: idCat, locale, searchParams: sp
   const [category, { ids: productIds, total }, filters] = await Promise.all([
     fetchCategory(idCat, idLang),
     fetchCategoryProductIdsWithFilters(idCat, page, PER_PAGE, activeFilters, orderby, orderdir),
-    fetchFilters(idCat),
+    fetchFilters(idCat, activeFilters),
   ]);
   if (!category) notFound();
 

@@ -9,6 +9,7 @@ import { categoryUrl, manufacturerUrl, homeUrl, localeHref } from '@/lib/url-bui
 import CartBadge from './CartBadge';
 import LocaleSwitcher from './LocaleSwitcher';
 import MobileMenuDrawer from './MobileMenuDrawer';
+import SearchBox from './SearchBox';
 import AccountMenu from './AccountMenu';
 
 const itemLabelStyle: React.CSSProperties = {
@@ -43,7 +44,10 @@ export default async function Header() {
             <MobileMenuDrawer entries={megamenu.entries} locale={locale} loginLabel={t('login')} />
             <Link href={homeUrl(locale)} style={{ flexShrink: 0, textDecoration: 'none' }}>
               {shop.logo_url ? (
-                <img src={shop.logo_url} alt={shop.name} className="header-logo-img" style={{ width: 'auto', display: 'block' }} />
+                <>
+                  <img src={shop.logo_url} alt={shop.name} className="header-logo-img header-logo-full" style={{ width: 'auto', display: 'block' }} />
+                  <img src="/logo-compact.png" alt={shop.name} className="header-logo-img header-logo-compact" style={{ width: 'auto', display: 'none' }} />
+                </>
               ) : (
                 <span style={{ fontFamily: 'Roboto Condensed', fontWeight: 700, fontSize: 24, color: '#fff' }}>{shop.name}</span>
               )}
@@ -51,14 +55,7 @@ export default async function Header() {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <form action="/recherche" method="GET" className="header-search-form" style={{ width: '100%', maxWidth: 500, position: 'relative' }}>
-              <input type="text" name="s" placeholder={t('search')} aria-label="Rechercher"
-                style={{ width: '100%', padding: '10px 40px 10px 14px', border: '1px solid var(--or-grey-lighter)', borderRadius: 4, fontSize: 14, fontFamily: 'inherit', boxSizing: 'border-box', background: '#fff', color: 'var(--or-text)' }} />
-              <button type="submit" aria-label="Rechercher"
-                style={{ position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)', width: 32, height: 32, background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--or-text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <i className="material-icons" style={{ fontSize: 20 }}>search</i>
-              </button>
-            </form>
+            <SearchBox placeholder={t('search')} />
           </div>
 
           <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: 16, justifyContent: 'flex-end' }}>
@@ -67,6 +64,11 @@ export default async function Header() {
             <LocaleSwitcher />
           </div>
         </div>
+      </div>
+
+      {/* Barre de recherche mobile (Juno/Discogs) - visible uniquement sur mobile */}
+      <div className="header-search-mobile">
+        <SearchBox placeholder={t('search')} />
       </div>
 
       {/* Mega-menu (même couleur sombre, séparé par une ligne fine) */}

@@ -51,7 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <CartProvider>
               <PlayerProvider>
                 <Header />
-                <main style={{ width: '100%', maxWidth: 1650, margin: '0 auto', padding: '24px 32px' }}>
+                <main className="site-main" style={{ width: '100%', maxWidth: 1650, margin: '0 auto' }}>
                   {children}
                 </main>
                 <Footer />

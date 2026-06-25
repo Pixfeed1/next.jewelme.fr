@@ -58,3 +58,67 @@ body.orp-player-active { padding-bottom: calc(var(--orp-height) + 8px); }
 .orp-play-btn-inline.orp-playing { background: var(--orp-playing-bg); }
 .orp-play-btn-inline.orp-playing:hover { background: var(--orp-playing-bg-hover); }
 .orp-play-btn-inline.orp-playing::before { -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><rect x='1.5' y='1' width='3' height='10'/><rect x='7.5' y='1' width='3' height='10'/></svg>") no-repeat center / contain; mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><rect x='1.5' y='1' width='3' height='10'/><rect x='7.5' y='1' width='3' height='10'/></svg>") no-repeat center / contain; }
+
+/* Masquer le bouton flottant natif Brevo (au cas ou hideButton API ne marche pas) */
+#brevo-conversations-icon,
+#brevo-conversations > div:first-child:not([class*="window"]):not([class*="chat-window"]),
+iframe[id*="brevo-conversations"][title*="outon"],
+iframe[id*="brevo-conversations"][title*="utton"],
+iframe[id*="brevo-conversations"][title*="hat icon"],
+iframe[id*="brevo-conversations-launcher"] {
+    display: none !important;
+}
+
+@media (max-width: 480px) {
+    .orp-chat-btn { width: 32px; height: 32px; }
+}
+
+/* === Bouton chat Brevo integre dans le lecteur (orp-chat-btn-finition) === */
+.orp-chat-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--orp-accent);
+    color: var(--orp-bg);
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background-color .15s ease, transform .1s ease;
+    margin-left: 6px;
+    padding: 0;
+}
+.orp-chat-btn:hover { background: var(--orp-accent-hover); }
+.orp-chat-btn:active { transform: scale(0.95); }
+.orp-chat-btn svg { display: block; }
+
+/* Aligner verticalement les controles a droite (mute, chat, close) */
+.orp-volume-wrap,
+.orp-chat-btn,
+.orp-btn-close {
+    align-self: center;
+}
+
+/* Masquer AGRESSIVEMENT le widget Brevo natif pour liberer les clics */
+#brevo-conversations,
+[id^="brevo-conversations"],
+iframe[id*="brevo"],
+iframe[src*="brevo"],
+iframe[title*="Brevo"],
+iframe[title*="hat icon"],
+iframe[title*="hat button"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .orp-chat-btn { width: 34px; height: 34px; margin-left: 4px; }
+}
+@media (max-width: 480px) {
+    .orp-chat-btn { width: 30px; height: 30px; margin-left: 2px; }
+    .orp-chat-btn svg { width: 13px; height: 13px; }
+}

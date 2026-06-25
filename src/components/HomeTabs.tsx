@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useLocale } from '@/lib/locale-context';
+import { useT } from '@/lib/i18n';
 import type { PrestaProduct } from '@/lib/presta';
 import type { SliderConfig } from '@/lib/headless-api';
 import ProductCard from './ProductCard';
@@ -25,6 +26,7 @@ const ArrowIcon = () => (
 
 export default function HomeTabs({ tabs }: Props) {
   const { locale } = useLocale();
+  const t = useT();
   const [activeId, setActiveId] = useState<number>(tabs[0]?.id ?? 0);
   if (tabs.length === 0) return null;
   const active = tabs.find((t) => t.id === activeId) ?? tabs[0];
@@ -60,7 +62,7 @@ export default function HomeTabs({ tabs }: Props) {
         </div>
       </div>
       {active.products.length === 0 ? (
-        <p style={{ color: '#888', fontStyle: 'italic', padding: 16 }}>Aucun produit dans cet onglet.</p>
+        <p style={{ color: '#888', fontStyle: 'italic', padding: 16 }}>{t('no_product_in_tab')}</p>
       ) : (
         <>
           {useCarousel ? (

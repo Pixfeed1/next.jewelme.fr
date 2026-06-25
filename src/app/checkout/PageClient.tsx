@@ -11,13 +11,14 @@ import { useT } from '@/lib/i18n';
 import { getProductImageUrl } from '@/lib/presta';
 import VoucherForm from '@/components/VoucherForm';
 import PaymentMethodSelector, { type PaymentOption } from '@/components/PaymentMethodSelector';
+import ParcelPointSelector, { type ParcelPointEntry } from '@/components/ParcelPointSelector';
 import PayboxRedirectForm from '@/components/PayboxRedirectForm';
 
 const PAYBOX_ID = 'paybox';
 
 interface Country { id: number; iso: string; name: string; need_zip_code: boolean; zip_format: string; contains_states: boolean; }
 interface PaymentMethod { id: string; name: string; label: string; instructions: string; }
-interface Carrier { id: number; name: string; delay: string; price: number; price_str: string; logo: string | null; is_free: boolean; }
+interface Carrier { id: number; name: string; delay: string; price: number; price_str: string; logo: string | null; is_free: boolean; is_parcel_point?: boolean; networks?: string[]; }
 interface InitData { countries: Country[]; payment_methods: PaymentMethod[]; cgv: { id_cms: number; slug: string; title: string } | null; default_country: number; }
 
 type Step = 1 | 2 | 3 | 4;
@@ -78,6 +79,7 @@ export default function CheckoutPage() {
   const [carriers, setCarriers] = useState<Carrier[]>([]);
   const [loadingCarriers, setLoadingCarriers] = useState(false);
   const [idCarrier, setIdCarrier] = useState<number | null>(null);
+  const [selectedParcelPoint, setSelectedParcelPoint] = useState<ParcelPointEntry | null>(null);
   const [message, setMessage] = useState('');
 
   // Step 4 - payment
@@ -135,7 +137,8 @@ export default function CheckoutPage() {
   const validStep1 = email.includes('@') && firstname.trim() && lastname.trim();
   const validStep2 = deliveryAddr.address1 && deliveryAddr.postcode && deliveryAddr.city && deliveryAddr.id_country && deliveryAddr.phone
     && (useSameAddress || (invoiceAddr.address1 && invoiceAddr.postcode && invoiceAddr.city && invoiceAddr.id_country && invoiceAddr.phone));
-  const validStep3 = idCarrier !== null;
+  const selectedCarrier = idCarrier !== null ? carriers.find(c => c.id === idCarrier) : null;
+  const validStep3 = idCarrier !== null && (!selectedCarrier?.is_parcel_point || selectedParcelPoint !== null);
   const validStep4 = paymentMethod !== '' && acceptCgv;
 
   const handleSubmit = async () => {
@@ -149,6 +152,7 @@ export default function CheckoutPage() {
       use_same_address: useSameAddress,
       billing_address: useSameAddress ? undefined : invoiceAddr,
       id_carrier: idCarrier,
+      parcel_point: selectedParcelPoint?.parcelPoint || undefined,
       payment_method: paymentMethod,
       message,
       accept_cgv: acceptCgv,
@@ -162,7 +166,7 @@ export default function CheckoutPage() {
       });
       const data = await r.json();
       if (!r.ok || data.success === false || data.error) {
-        setSubmitError(data.error || 'Erreur lors de la commande');
+        setSubmitError(data.error || t('order_error'));
         setSubmitting(false);
         return;
       }
@@ -186,7 +190,7 @@ export default function CheckoutPage() {
           setPayboxData({ url: initData.url, fields: initData.fields });
           return; // on reste en submitting → loader affiché jusqu'à la redirection
         }
-        setSubmitError(initData.error || 'Erreur lors de l\'initialisation du paiement');
+        setSubmitError(initData.error || t('payment_init_error'));
         setSubmitting(false);
         return;
       }
@@ -196,23 +200,23 @@ export default function CheckoutPage() {
         localStorage.removeItem('pixfeed_cart_token');
         router.push(localeHref(`/confirmation/${data.reference}`, locale));
       } else {
-        setSubmitError(data.error || 'Erreur lors de la commande');
+        setSubmitError(data.error || t('order_error'));
         setSubmitting(false);
       }
     } catch (e: any) {
-      setSubmitError(e.message || 'Erreur réseau');
+      setSubmitError(e.message || t('network_error'));
       setSubmitting(false);
     }
   };
 
   if (loadingInit) {
-    return <div style={{ padding: 48, textAlign: 'center', color: '#888' }}>Chargement…</div>;
+    return <div style={{ padding: 48, textAlign: 'center', color: '#888' }}>{t('loading_word')}</div>;
   }
   if (!cart || cart.items.length === 0) {
     return (
       <div style={{ maxWidth: 600, margin: '0 auto', padding: 48, textAlign: 'center' }}>
-        <p style={{ fontSize: 16, color: '#888' }}>Votre panier est vide.</p>
-        <Link href={homeUrl(locale)} style={{ display: 'inline-block', marginTop: 16, padding: '12px 28px', background: '#a3a2a2', color: '#fff', textDecoration: 'none', borderRadius: 4, fontSize: 13, fontWeight: 600, textTransform: 'uppercase' }}>Retour boutique</Link>
+        <p style={{ fontSize: 16, color: '#888' }}>{t('empty_cart')}</p>
+        <Link href={homeUrl(locale)} style={{ display: 'inline-block', marginTop: 16, padding: '12px 28px', background: '#a3a2a2', color: '#fff', textDecoration: 'none', borderRadius: 4, fontSize: 13, fontWeight: 600, textTransform: 'uppercase' }}>{t('back_to_shop')}</Link>
       </div>
     );
   }
@@ -233,14 +237,14 @@ export default function CheckoutPage() {
       )}
       {payboxData && <PayboxRedirectForm url={payboxData.url} fields={payboxData.fields} />}
       <p style={{ marginBottom: 20, fontSize: 13, color: '#888' }}>
-        <Link href={homeUrl(locale)} style={{ color: '#888', textDecoration: 'none' }}>Accueil</Link>
+        <Link href={homeUrl(locale)} style={{ color: '#888', textDecoration: 'none' }}>{t('home')}</Link>
         <span style={{ margin: '0 8px' }}>›</span>
-        <Link href={localeHref('/panier', locale)} style={{ color: '#888', textDecoration: 'none' }}>Panier</Link>
+        <Link href={localeHref('/panier', locale)} style={{ color: '#888', textDecoration: 'none' }}>{t('cart')}</Link>
         <span style={{ margin: '0 8px' }}>›</span>
-        <span style={{ color: '#333' }}>Commande</span>
+        <span style={{ color: '#333' }}>{t('order_breadcrumb')}</span>
       </p>
 
-      <h1 style={{ fontSize: 26, fontWeight: 700, margin: '0 0 24px' }}>Finaliser ma commande</h1>
+      <h1 style={{ fontSize: 26, fontWeight: 700, margin: '0 0 24px' }}>{t('finalize_order')}</h1>
 
       {/* Stepper */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 32, flexWrap: 'wrap' }}>
@@ -289,10 +293,10 @@ export default function CheckoutPage() {
                   {t('guest_checkout')}
                 </div>
               )}
-              <FormField label="Email *" type="email" value={email} onChange={setEmail} placeholder="vous@exemple.fr" />
+              <FormField label={`${t('email_field')} *`} type="email" value={email} onChange={setEmail} placeholder={t('email_placeholder_full')} />
               <div className="checkout-form-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                <FormField label="Prénom *" value={firstname} onChange={setFirstname} />
-                <FormField label="Nom *" value={lastname} onChange={setLastname} />
+                <FormField label={`${t('first_name')} *`} value={firstname} onChange={setFirstname} />
+                <FormField label={`${t('last_name')} *`} value={lastname} onChange={setLastname} />
               </div>
               <NextBtn disabled={!validStep1} onClick={() => setStep(2)} />
             </section>
@@ -311,7 +315,7 @@ export default function CheckoutPage() {
 
               {!useSameAddress && (
                 <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid #e5e0d6' }}>
-                  <h2 style={h2Style}>Adresse de facturation</h2>
+                  <h2 style={h2Style}>{t('billing_address')}</h2>
                   <AddressFields addr={invoiceAddr} setAddr={setInvoiceAddr} countries={init.countries} />
                 </div>
               )}
@@ -326,38 +330,49 @@ export default function CheckoutPage() {
           {/* STEP 3 - shipping */}
           {step === 3 && (
             <section style={sectionStyle}>
-              <h2 style={h2Style}>Mode de livraison</h2>
+              <h2 style={h2Style}>{t('shipping_method')}</h2>
               {loadingCarriers ? (
-                <p style={{ color: '#888' }}>Calcul des frais de port…</p>
+                <p style={{ color: '#888' }}>{t('calculating_shipping')}</p>
               ) : carriers.length === 0 ? (
-                <p style={{ color: '#bf1212' }}>Aucun transporteur disponible pour cette adresse.</p>
+                <p style={{ color: '#bf1212' }}>{t('no_carrier_available')}</p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {carriers.map(c => (
-                    <label key={c.id} style={{
-                      display: 'flex', alignItems: 'center', gap: 12, padding: 16,
-                      border: idCarrier === c.id ? '2px solid #a3a2a2' : '1px solid #e5e0d6',
-                      borderRadius: 4, cursor: 'pointer', background: idCarrier === c.id ? '#f0f7f2' : '#fff',
-                    }}>
-                      <input type="radio" name="carrier" checked={idCarrier === c.id} onChange={() => setIdCarrier(c.id)} />
-                      {c.logo && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={c.logo} alt={c.name} style={{ width: 48, height: 32, objectFit: 'contain' }} />
+                    <div key={c.id}>
+                      <label style={{
+                        display: 'flex', alignItems: 'center', gap: 12, padding: 16,
+                        border: idCarrier === c.id ? '2px solid #a3a2a2' : '1px solid #e5e0d6',
+                        borderRadius: 4, cursor: 'pointer', background: idCarrier === c.id ? '#f0f7f2' : '#fff',
+                      }}>
+                        <input type="radio" name="carrier" checked={idCarrier === c.id} onChange={() => { setIdCarrier(c.id); if (!c.is_parcel_point) setSelectedParcelPoint(null); }} />
+                        {c.logo && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={c.logo} alt={c.name} style={{ width: 48, height: 32, objectFit: 'contain' }} />
+                        )}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 600, fontSize: 14 }}>{c.name}</div>
+                          {c.delay && <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{c.delay}</div>}
+                        </div>
+                        <strong style={{ color: '#666' }}>{c.price_str}</strong>
+                      </label>
+                      {idCarrier === c.id && c.is_parcel_point && (
+                        <ParcelPointSelector
+                          carrierId={c.id}
+                          initialZipCode={deliveryAddr.postcode}
+                          country={init?.countries.find(co => co.id === deliveryAddr.id_country)?.iso || 'FR'}
+                          selectedPointCode={selectedParcelPoint?.parcelPoint?.code || null}
+                          onSelect={entry => setSelectedParcelPoint(entry)}
+                        />
                       )}
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600, fontSize: 14 }}>{c.name}</div>
-                        {c.delay && <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{c.delay}</div>}
-                      </div>
-                      <strong style={{ color: '#666' }}>{c.price_str}</strong>
-                    </label>
+                    </div>
                   ))}
                 </div>
               )}
 
               <div style={{ marginTop: 24 }}>
-                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Commentaire (optionnel)</label>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>{t('comment_optional')}</label>
                 <textarea value={message} onChange={e => setMessage(e.target.value)} rows={3}
-                  placeholder="Une remarque pour votre commande ?"
+                  placeholder={t('comment_placeholder')}
                   style={{ width: '100%', padding: 10, border: '1px solid #e5e0d6', borderRadius: 4, fontSize: 14, resize: 'vertical', fontFamily: 'inherit' }} />
               </div>
 
@@ -383,10 +398,10 @@ export default function CheckoutPage() {
 
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 24, fontSize: 13, cursor: 'pointer' }}>
                 <input type="checkbox" checked={acceptCgv} onChange={e => setAcceptCgv(e.target.checked)} style={{ marginTop: 3 }} />
-                <span>J&apos;accepte les{' '}
+                <span>{t('i_accept_the')}{' '}
                   {init.cgv ? (
                     <Link href={cmsUrl({ id: init.cgv.id_cms, slug: init.cgv.slug }, locale)} target="_blank" style={{ color: '#666', textDecoration: 'underline' }}>{init.cgv.title}</Link>
-                  ) : 'conditions générales de vente'}.</span>
+                  ) : t('cgv_link_text')}.</span>
               </label>
 
               {submitError && (
@@ -440,11 +455,11 @@ export default function CheckoutPage() {
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
-            <span style={{ color: '#666' }}>Sous-total</span><span>{fmt(cart.totals.subtotal ?? 0)}</span>
+            <span style={{ color: '#666' }}>{t('subtotal')}</span><span>{fmt(cart.totals.subtotal ?? 0)}</span>
           </div>
           {cart.totals.discounts && cart.totals.discounts > 0 ? (
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0', color: '#3f6e51' }}>
-              <span>Réduction</span><span>− {fmt(cart.totals.discounts)}</span>
+              <span>{t('discount_label')}</span><span>− {fmt(cart.totals.discounts)}</span>
             </div>
           ) : null}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
@@ -452,7 +467,7 @@ export default function CheckoutPage() {
             <span>{idCarrier !== null && carriers.find(c => c.id === idCarrier) ? fmt(carriers.find(c => c.id === idCarrier)!.price) : fmt(cart.totals.shipping)}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, fontWeight: 700, marginTop: 8, paddingTop: 12, borderTop: '1px solid #e5e0d6' }}>
-            <span>Total TTC</span>
+            <span>{t('total_ttc')}</span>
             <span style={{ color: '#bf1212' }}>{fmt(
               (cart.totals.subtotal ?? 0)
               + (idCarrier !== null && carriers.find(c => c.id === idCarrier) ? carriers.find(c => c.id === idCarrier)!.price : cart.totals.shipping)
@@ -479,24 +494,25 @@ function FormField({ label, value, onChange, type = 'text', placeholder = '' }: 
 }
 
 function AddressFields({ addr, setAddr, countries }: { addr: AddressForm; setAddr: (a: AddressForm) => void; countries: Country[]; }) {
+  const t = useT();
   const u = (k: keyof AddressForm, v: any) => setAddr({ ...addr, [k]: v });
   return (
     <>
-      <FormField label="Société (optionnel)" value={addr.company} onChange={v => u('company', v)} />
-      <FormField label="Adresse *" value={addr.address1} onChange={v => u('address1', v)} placeholder="Numéro et nom de rue" />
-      <FormField label="Complément (optionnel)" value={addr.address2} onChange={v => u('address2', v)} />
+      <FormField label={t('company_optional')} value={addr.company} onChange={v => u('company', v)} />
+      <FormField label={`${t('address_field')} *`} value={addr.address1} onChange={v => u('address1', v)} placeholder={t('address_placeholder')} />
+      <FormField label={t('address_line_2')} value={addr.address2} onChange={v => u('address2', v)} />
       <div className="checkout-billing-row" style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 16 }}>
-        <FormField label="Code postal *" value={addr.postcode} onChange={v => u('postcode', v)} />
-        <FormField label="Ville *" value={addr.city} onChange={v => u('city', v)} />
+        <FormField label={`${t('postcode')} *`} value={addr.postcode} onChange={v => u('postcode', v)} />
+        <FormField label={`${t('city')} *`} value={addr.city} onChange={v => u('city', v)} />
       </div>
       <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>Pays *</label>
+        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>{t('country')} *</label>
         <select value={addr.id_country} onChange={e => u('id_country', Number(e.target.value))}
           style={{ width: '100%', padding: '10px 12px', border: '1px solid #e5e0d6', borderRadius: 4, fontSize: 14, background: '#fff', boxSizing: 'border-box' }}>
           {countries.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </div>
-      <FormField label="Téléphone *" type="tel" value={addr.phone} onChange={v => u('phone', v)} placeholder="+33..." />
+      <FormField label={`${t('phone_field')} *`} type="tel" value={addr.phone} onChange={v => u('phone', v)} placeholder={t('phone_placeholder')} />
     </>
   );
 }
@@ -512,6 +528,7 @@ function NextBtn({ disabled, onClick }: { disabled?: boolean; onClick: () => voi
 }
 
 function BackBtn({ onClick, disabled }: { onClick: () => void; disabled?: boolean; }) {
+  const t = useT();
   return (
     <button onClick={onClick} disabled={disabled}
       style={{ padding: '12px 22px', background: 'transparent', color: '#666', border: '1px solid #3f6e51', borderRadius: 4, cursor: disabled ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>

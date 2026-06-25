@@ -829,3 +829,87 @@ body.orp-player-active .cart-side-panel {
 .home-tab-btn:hover {
   color: #1a1a1a !important;
 }
+
+/* ===================== RESPONSIVE STEP A ===================== */
+/* Securite anti-scroll horizontal (clip ne casse pas position:sticky) */
+html { overflow-x: clip; }
+body { overflow-x: clip; max-width: 100%; }
+
+/* Conteneur principal : padding desktop, reduit sur mobile pour pleine largeur */
+.site-main { padding: 24px 32px; }
+
+@media (max-width: 768px) {
+  .site-main { padding: 16px 12px; }
+  /* Layout categorie/recherche : sidebar empilee au-dessus du contenu */
+  .category-layout { grid-template-columns: 1fr !important; }
+  /* Checkout : colonne unique (form puis recap) */
+  .checkout-layout { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 480px) {
+  .site-main { padding: 12px 10px; }
+}
+/* =========================================================== */
+
+/* === Barre de recherche mobile (Juno/Discogs) === */
+.header-search-mobile { display: none; }
+
+@media (max-width: 768px) {
+  .header-search-mobile {
+    display: block;
+    padding: 0 12px 10px;
+    background: var(--or-dark);
+  }
+  /* Force l'affichage du form malgre le display:none global sur .header-search-form */
+  .header-search-mobile .header-search-form {
+    display: flex !important;
+    width: 100%;
+    max-width: 100%;
+  }
+  /* Le wrapper interne du SearchBox prend toute la largeur (override maxWidth:500 inline) */
+  .header-search-mobile > div {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+}
+
+/* === ANTI-ZOOM IOS (font 16px sur mobile empeche le zoom auto au focus) === */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="search"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select,
+  .header-search-mobile input,
+  .header-search-form input,
+  .pwf-input {
+    font-size: 16px !important;
+  }
+}
+
+/* === Logo responsive : complet desktop / compact mobile === */
+.header-logo-compact { display: none !important; }
+.header-logo-full { display: block !important; }
+
+@media (max-width: 768px) {
+  .header-logo-full { display: none !important; }
+  .header-logo-compact { display: block !important; }
+}
+
+/* === CONTACT MOBILE : layout + FormRow empiles === */
+@media (max-width: 768px) {
+  .contact-page { padding-left: 0 !important; padding-right: 0 !important; }
+  .contact-layout {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  .contact-form-row {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+    align-items: start !important;
+    margin-bottom: 14px !important;
+  }
+}
