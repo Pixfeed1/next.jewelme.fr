@@ -42,6 +42,17 @@ const PER_PAGE = 30;
 export default async function CategoryView({ id: idCat, locale, searchParams: sp }: { id: number; locale: string; searchParams: SP }) {
   const pageStr = typeof sp.page === 'string' ? sp.page : '1';
   const page = Math.max(1, parseInt(pageStr, 10) || 1);
+  const buildPageUrl = (n: number) => {
+    const qs = new URLSearchParams();
+    for (const [k, v] of Object.entries(sp)) {
+      if (k === 'page') continue;
+      if (Array.isArray(v)) { v.forEach((x) => qs.append(k, x)); }
+      else if (typeof v === 'string') { qs.set(k, v); }
+    }
+    if (n > 1) qs.set('page', String(n));
+    const s = qs.toString();
+    return s ? `${catUrl}?${s}` : catUrl;
+  };
   const activeFilters = parseFiltersFromSearchParams(sp);
   const viewRaw = typeof sp.view === 'string' ? sp.view : 'grid';
   const view: ViewMode = (viewRaw === 'list' || viewRaw === 'table') ? viewRaw : 'grid';
@@ -124,13 +135,13 @@ export default async function CategoryView({ id: idCat, locale, searchParams: sp
       {totalPages > 1 && (
         <nav style={{ display: 'flex', justifyContent: 'center', gap: 16, marginTop: 48, alignItems: 'center' }}>
           {page > 1 ? (
-            <Link href={`${catUrl}?page=${page - 1}`} style={{ padding: '8px 16px', border: '1px solid var(--or-grey-lighter)', borderRadius: 4, textDecoration: 'none', color: 'var(--or-text)' }}>
+            <Link href={buildPageUrl(page - 1)} style={{ padding: '8px 16px', border: '1px solid var(--or-grey-lighter)', borderRadius: 4, textDecoration: 'none', color: 'var(--or-text)' }}>
               ← Précédent
             </Link>
           ) : null}
           <span style={{ color: '#666', fontSize: 14 }}>Page {page} / {totalPages}</span>
           {page < totalPages ? (
-            <Link href={`${catUrl}?page=${page + 1}`} style={{ padding: '8px 16px', border: '1px solid var(--or-grey-lighter)', borderRadius: 4, textDecoration: 'none', color: 'var(--or-text)' }}>
+            <Link href={buildPageUrl(page + 1)} style={{ padding: '8px 16px', border: '1px solid var(--or-grey-lighter)', borderRadius: 4, textDecoration: 'none', color: 'var(--or-text)' }}>
               Suivant →
             </Link>
           ) : null}
