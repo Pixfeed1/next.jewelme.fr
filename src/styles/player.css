@@ -18,6 +18,9 @@
     --orp-btn-radius: 6px;
     --orp-playing-bg: #3f6e51;
     --orp-playing-bg-hover: #335a42;
+    /* Couleur dediee au bouton chat flottant, distincte du lecteur */
+    --orp-chat-bg: #0b7285;
+    --orp-chat-bg-hover: #095c6b;
 }
 .orp-player { position: fixed; bottom: 0; left: 0; right: 0; height: var(--orp-height); background: var(--orp-bg); color: var(--orp-text); z-index: var(--orp-z);  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; }
 .orp-player-inner { display: flex; align-items: center; height: 100%; padding: 0 16px; gap: 16px; }
@@ -69,34 +72,40 @@ iframe[id*="brevo-conversations-launcher"] {
     display: none !important;
 }
 
-@media (max-width: 480px) {
-    .orp-chat-btn { width: 32px; height: 32px; }
-}
-
-/* === Bouton chat Brevo integre dans le lecteur (orp-chat-btn-finition) === */
-.orp-chat-btn {
-    width: 36px;
-    height: 36px;
+/* === Bouton chat Brevo flottant et independant du lecteur === */
+/* Toujours visible (lecteur ouvert ou ferme), ancre en bas a droite.
+   Couleur dediee + icone bulle de discussion pour le distinguer clairement
+   des controles audio. */
+.orp-chat-fab {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
-    background: var(--orp-accent);
-    color: var(--orp-bg);
+    background: var(--orp-chat-bg);
+    color: #ffffff;
     border: none;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    transition: background-color .15s ease, transform .1s ease;
-    margin-left: 6px;
     padding: 0;
+    z-index: calc(var(--orp-z) + 1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+    transition: background-color .15s ease, transform .1s ease, bottom .25s ease;
 }
-.orp-chat-btn:hover { background: var(--orp-accent-hover); }
-.orp-chat-btn:active { transform: scale(0.95); }
-.orp-chat-btn svg { display: block; }
+.orp-chat-fab:hover { background: var(--orp-chat-bg-hover); }
+.orp-chat-fab:active { transform: scale(0.94); }
+.orp-chat-fab svg { display: block; }
 
-/* Aligner verticalement les controles a droite (mute, chat, close) */
+/* CONTRAINTE MOBILE : ne jamais recouvrir le lecteur. Quand le lecteur est
+   visible, body recoit .orp-player-active ; on remonte le bouton au-dessus de
+   lui en reutilisant la meme hauteur de decalage (80px desktop / 64px mobile). */
+body.orp-player-active .orp-chat-fab { bottom: 100px; }
+
+/* Aligner verticalement le bouton fermer a droite */
 .orp-volume-wrap,
-.orp-chat-btn,
 .orp-btn-close {
     align-self: center;
 }
@@ -115,10 +124,9 @@ iframe[title*="hat button"] {
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-    .orp-chat-btn { width: 34px; height: 34px; margin-left: 4px; }
-}
 @media (max-width: 480px) {
-    .orp-chat-btn { width: 30px; height: 30px; margin-left: 2px; }
-    .orp-chat-btn svg { width: 13px; height: 13px; }
+    .orp-chat-fab { right: 16px; bottom: 16px; width: 52px; height: 52px; }
+    /* Lecteur visible en mobile : padding de 64px -> on remonte de 64 + 16 */
+    body.orp-player-active .orp-chat-fab { bottom: 80px; }
+    .orp-chat-fab svg { width: 24px; height: 24px; }
 }
