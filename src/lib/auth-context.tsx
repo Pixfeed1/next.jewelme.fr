@@ -112,6 +112,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await fetch('/api/auth/logout', { method: 'POST' });
     } catch {}
     setUser(null);
+    // Le panier (token localStorage) est independant de l'auth : on previent
+    // le CartProvider pour qu'il reparte sur un panier vide a la deconnexion.
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('pixfeed:logout'));
+    }
   }, []);
 
   return (

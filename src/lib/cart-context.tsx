@@ -124,6 +124,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
     refresh();
   }, [refresh]);
 
+  // A la deconnexion : on abandonne le panier courant en generant un nouveau
+  // token (= panier vide) puis on resynchronise. Le panier ne suit donc pas
+  // d'un compte a l'autre sur le meme navigateur.
+  const resetCart = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(TOKEN_KEY, genToken());
+    }
+    setCart(null);
+    setPanelOpen(false);
+    refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onLogout = () => resetCart();
+    window.addEventListener('pixfeed:logout', onLogout);
+    return () => window.removeEventListener('pixfeed:logout', onLogout);
+  }, [resetCart]);
+
   const addItem = useCallback(async (id_product: number, qty = 1, id_product_attribute = 0): Promise<boolean> => {
     const token = getOrCreateToken();
     setLoading(true);
