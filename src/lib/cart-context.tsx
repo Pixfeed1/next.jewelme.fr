@@ -103,8 +103,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const cartRef = useRef<CartState | null>(cart);
   useEffect(() => { cartRef.current = cart; }, [cart]);
 
-  const refresh = useCallback(async () => {
-    const token = getOrCreateToken();
+  const refresh = useCallback(async (forcedToken?: string) => {
+    const token = forcedToken ?? getOrCreateToken();
     if (!token) return;
     setLoading(true);
     try {
@@ -128,12 +128,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // token (= panier vide) puis on resynchronise. Le panier ne suit donc pas
   // d'un compte a l'autre sur le meme navigateur.
   const resetCart = useCallback(() => {
+    let fresh = '';
     if (typeof window !== 'undefined') {
-      localStorage.setItem(TOKEN_KEY, genToken());
+      fresh = genToken();
+      localStorage.setItem(TOKEN_KEY, fresh);
     }
     setCart(null);
     setPanelOpen(false);
-    refresh();
+    refresh(fresh || undefined);
   }, [refresh]);
 
   useEffect(() => {
