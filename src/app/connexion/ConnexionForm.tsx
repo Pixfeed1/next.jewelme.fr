@@ -61,9 +61,9 @@ export default function ConnexionForm({ locale }: { locale: string }) {
             onChange={(e) => setPassword(e.target.value)} style={inputStyle} autoComplete="current-password" />
         </div>
         <div style={{ textAlign: 'right', marginBottom: 20 }}>
-          <span style={{ fontSize: 12, color: '#aaa' }} title={t('account_coming_soon')}>
+          <Link href={localeHref('/mot-de-passe-oublie', locale)} style={{ fontSize: 12, color: '#1a1a1a', fontWeight: 700, textDecoration: 'underline' }}>
             {t('auth_forgot_password')}
-          </span>
+          </Link>
         </div>
         <button type="submit" disabled={submitting}
           style={{ width: '100%', padding: '12px 16px', background: '#1a1a1a', color: '#fff',
