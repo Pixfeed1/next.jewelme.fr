@@ -33,8 +33,8 @@ export default async function HomeProductSection({ title, products, sliderConfig
 
   return (
     <section style={{ marginBottom: 48 }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', paddingBottom: 0, marginBottom: 10, gap: 20 }}>
-        <h2 style={{ fontSize: 18, textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
+      <div className="home-section-head" style={{ display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', paddingBottom: 0, marginBottom: 10, gap: 20 }}>
+        <h2 className="home-section-title" style={{ fontSize: 18, textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
           {title}
         </h2>
         {viewAllHref ? (

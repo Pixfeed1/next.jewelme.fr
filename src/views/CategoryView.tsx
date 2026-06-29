@@ -81,7 +81,7 @@ export default async function CategoryView({ id: idCat, locale, searchParams: sp
       <div className="category-layout" style={{ display: 'grid', gridTemplateColumns: filters.groups.length > 0 ? 'minmax(220px, 250px) 1fr' : '1fr', gap: 32, alignItems: 'start' }}>
         {filters.groups.length > 0 && <FilterSidebar groups={filters.groups} />}
 
-        <div>
+        <div style={{ minWidth: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 16, paddingBottom: 12, borderBottom: '1px solid var(--or-grey-lighter)' }}>
             {filters.groups.length > 0 && <FilterToolbarButton />}
             <SortDropdown current={sortKey} />
