@@ -33,7 +33,7 @@ export default function ViewSwitcher({ current }: { current: ViewMode }) {
   });
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+    <div className="view-switcher" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
       <span style={{ fontSize: 13, color: '#666', marginRight: 8, textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em' }}>{t('view')}</span>
       <button onClick={() => setView('grid')} style={btnStyle(current === 'grid')} title={t("view_grid")} aria-label={t("view_grid")}>
         <i className="material-icons">view_comfy</i>
