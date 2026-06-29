@@ -92,7 +92,7 @@ a { color: inherit; }
 
 
 /* Bouton panier : noir uniquement au survol direct du bouton */
-.product-card-cart-btn:hover {
+.product-card-cart-btn:not(:disabled):hover {
   background: #1a1a1a !important;
 }
 
@@ -913,3 +913,9 @@ body { overflow-x: clip; max-width: 100%; }
     margin-bottom: 14px !important;
   }
 }
+
+/* Panier carte : forcer la couleur de l'icone (coupe l'heritage du lien parent / :visited violet) */
+.product-card-cart-btn svg { color: #fff; }
+.product-card-cart-btn svg path,
+.product-card-cart-btn svg circle { stroke: currentColor; fill: none; }
+.product-card-cart-btn:disabled svg { color: #fff; }
