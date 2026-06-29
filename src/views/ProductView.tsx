@@ -59,7 +59,7 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
   return (
     <>
       {trackingNode}
-    <div style={{ maxWidth: 1280, paddingLeft: 32, paddingRight: 16 }}>
+    <div className="product-page-wrap" style={{ maxWidth: 1280, margin: "0 auto" }}>
       <p style={{ marginBottom: 24, fontSize: 13 }}>
         <Link href={homeUrl(locale)} style={{ color: '#888', textDecoration: 'none' }}>{tr('home')}</Link>
         {category && (

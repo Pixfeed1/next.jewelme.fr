@@ -29,7 +29,7 @@ export default async function ProductCrossSell({ productId }: Props) {
   };
   const gridStyle = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(min(140px, 100%), 1fr))',
     gap: 12,
   };
 
