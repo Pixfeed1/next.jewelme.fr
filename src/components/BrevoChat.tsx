@@ -58,15 +58,7 @@ export default function BrevoChat() {
         title="Discuter avec nous"
         aria-label="Discuter avec nous"
       >
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path
-            d="M12 3C6.48 3 2 6.7 2 11.25c0 2.36 1.21 4.49 3.15 5.98-.13 1.1-.6 2.55-1.6 3.77 1.86-.27 3.5-1.02 4.7-1.86 1.16.36 2.42.56 3.75.56 5.52 0 10-3.7 10-8.45S17.52 3 12 3z"
-            fill="currentColor"
-          />
-          <circle cx="8" cy="11.25" r="1.3" fill="#ffffff" />
-          <circle cx="12" cy="11.25" r="1.3" fill="#ffffff" />
-          <circle cx="16" cy="11.25" r="1.3" fill="#ffffff" />
-        </svg>
+        <span className="orp-chat-fab-label">Envoyez nous un message</span>
       </button>
     </>
   );
