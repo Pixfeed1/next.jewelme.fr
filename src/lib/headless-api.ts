@@ -85,17 +85,29 @@ function emptyStructure(error?: string): HomeStructure {
   };
 }
 
-export async function fetchCrossSellIds(idProduct: number): Promise<number[]> {
-  if (idProduct <= 0) return [];
+export interface CrossSellLists {
+  alsoBought: number[];
+  sameCategory: number[];
+}
+
+function sanitizeIds(arr: any): number[] {
+  return Array.isArray(arr) ? arr.filter((x: any) => typeof x === 'number' && x > 0) : [];
+}
+
+export async function fetchCrossSell(idProduct: number): Promise<CrossSellLists> {
+  if (idProduct <= 0) return { alsoBought: [], sameCategory: [] };
   const url = `${PRESTA_BASE}/index.php?fc=module&module=pixfeed_headless_api&controller=product_cross_sell&id_product=${idProduct}`;
   try {
     const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) return [];
+    if (!res.ok) return { alsoBought: [], sameCategory: [] };
     const data = await res.json();
-    return Array.isArray(data.product_ids) ? data.product_ids.filter((x: any) => typeof x === 'number' && x > 0) : [];
+    return {
+      alsoBought: sanitizeIds(data.also_bought),
+      sameCategory: sanitizeIds(data.same_category),
+    };
   } catch (err) {
-    console.error('[Headless API] fetchCrossSellIds error:', err);
-    return [];
+    console.error('[Headless API] fetchCrossSell error:', err);
+    return { alsoBought: [], sameCategory: [] };
   }
 }
 

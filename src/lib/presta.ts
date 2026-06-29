@@ -12,6 +12,12 @@ const API_KEY = process.env.PRESTA_API_KEY || '5KC84V1MI8YJR54U4HSZWFK4IQG2RS28'
 // === TAX RATES (cache 5 min) ===
 let _taxRatesCache: { data: { default_rate: number; rates: Record<string, number> } | null; expires: number } = { data: null, expires: 0 };
 
+function cleanStr(v: any): string {
+  if (v === false || v === null || v === undefined) return '';
+  const s = String(v);
+  return s === 'false' ? '' : s;
+}
+
 export async function fetchTaxRates(): Promise<{ default_rate: number; rates: Record<string, number> }> {
   const now = Date.now();
   if (_taxRatesCache.data && _taxRatesCache.expires > now) return _taxRatesCache.data;
@@ -157,7 +163,7 @@ function normalizeProduct(raw: Record<string, unknown>, taxRates: { default_rate
     price: parseFloat(String(raw.price ?? '0')),
     idTaxRulesGroup: parseInt(String(raw.id_tax_rules_group ?? '0'), 10),
     priceWt: applyTaxRate(parseFloat(String(raw.price ?? '0')), parseInt(String(raw.id_tax_rules_group ?? '0'), 10), taxRates),
-    reference: decodeHtmlEntities(String(raw.reference ?? '')),
+    reference: decodeHtmlEntities(cleanStr(raw.reference)),
     descriptionShort: decodeHtmlEntities(stripHtml(extractLangValue(raw.description_short))),
     description: extractLangValue(raw.description),
     active: String(raw.active) === '1',
@@ -174,7 +180,7 @@ function normalizeProduct(raw: Record<string, unknown>, taxRates: { default_rate
       return days >= 0 && days < 60;
     })(),
     images,
-    manufacturerName: decodeHtmlEntities(String(raw.manufacturer_name ?? '')),
+    manufacturerName: (raw.manufacturer_name && raw.manufacturer_name !== 'false') ? decodeHtmlEntities(String(raw.manufacturer_name)) : '',
     idManufacturer: parseInt(String(raw.id_manufacturer ?? '0'), 10),
     manufacturerLinkRewrite: '',
     linkRewrite: extractLangValue(raw.link_rewrite),
