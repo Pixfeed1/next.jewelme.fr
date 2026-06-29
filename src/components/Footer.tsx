@@ -136,7 +136,7 @@ export default async function Footer() {
 
       <div style={{ background: 'var(--or-dark)', padding: '16px 0', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 16px', display: 'flex', justifyContent: 'center' }}>
-          <img src="/img/payment/payment-methods.png" alt="Payment methods" style={{ maxHeight: 24, height: 'auto', width: 'auto' }} />
+          <img src="/img/payment/payment-methods.png" alt="Payment methods" style={{ maxHeight: 24, maxWidth: '100%', height: 'auto', width: 'auto', objectFit: 'contain' }} />
         </div>
       </div>
       <div style={{ background: 'var(--or-dark)', color: '#fff', padding: '14px 0' }}>

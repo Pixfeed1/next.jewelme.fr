@@ -819,7 +819,7 @@ a { color: inherit; }
 
 /* Quand le player audio est actif, le panier laterai libere de la place en bas */
 body.orp-player-active .cart-side-panel {
-  height: calc(100vh - var(--orp-height, 72px) - 8px) !important;
+  height: calc(100dvh - var(--orp-height, 72px) - 8px) !important;
 }
 
 /* Bouton "Ajouter au panier" : hover noir (cohérent avec card) */
@@ -845,6 +845,12 @@ body { overflow-x: clip; max-width: 100%; }
 /* Conteneur principal : padding desktop, reduit sur mobile pour pleine largeur */
 .site-main { padding: 24px 32px; }
 
+/* Empeche le blowout de la grille catgorie/recherche/fabricant : sans
+   min-width:0 la colonne 1fr s'etire a la largeur intrinseque de la vue
+   liste/tableau et depasse l'ecran sur mobile (le wrapper overflow-x ne
+   peut plus scroller). */
+.category-layout > * { min-width: 0; }
+
 @media (max-width: 768px) {
   .site-main { padding: 16px 12px; }
   /* Layout categorie/recherche : sidebar empilee au-dessus du contenu */
@@ -857,6 +863,26 @@ body { overflow-x: clip; max-width: 100%; }
   .site-main { padding: 12px 10px; }
 }
 /* =========================================================== */
+
+/* === Titres des blocs accueil : compacts sur mobile pour garder "Voir plus"
+   sur la meme ligne (en FR le titre est plus long et passait en dessous) === */
+@media (max-width: 768px) {
+  .home-section-head {
+    flex-wrap: nowrap !important;
+    justify-content: space-between;
+    gap: 10px !important;
+  }
+  .home-section-title {
+    font-size: 15px !important;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .home-section-head .view-all-link { flex-shrink: 0; }
+}
+@media (max-width: 480px) {
+  .home-section-title { font-size: 13px !important; }
+  .home-section-head .view-all-link { font-size: 13px !important; }
+}
 
 /* === Barre de recherche mobile (Juno/Discogs) === */
 .header-search-mobile { display: none; }

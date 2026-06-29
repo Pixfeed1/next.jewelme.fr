@@ -44,7 +44,7 @@ export default function CartSidePanel() {
         className="cart-side-panel"
         style={{
           position: 'fixed', top: 0, right: 0,
-          width: 360, maxWidth: '92vw', height: '100vh',
+          width: 360, maxWidth: '92vw', height: '100dvh',
           background: '#f5f0e8',
           zIndex: 1001,
           transform: panelOpen ? 'translate3d(0,0,0)' : 'translate3d(100%,0,0)',
