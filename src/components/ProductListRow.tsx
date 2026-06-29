@@ -6,6 +6,7 @@ import { useLocale } from '@/lib/locale-context';
 import ProductPlayButton from './ProductPlayButton';
 import ProductBadges from './ProductBadges';
 import ProductCardCartButton from './ProductCardCartButton';
+import ProductPrice from './ProductPrice';
 
 interface Props { product: PrestaProduct; }
 
@@ -29,7 +30,7 @@ export default function ProductListRow({ product }: Props) {
         </Link>
         {product.reference ? <p style={{ fontSize: 12, color: 'var(--or-text-muted)', margin: 0 }}>Réf : {product.reference}</p> : null}
         <p style={{ fontSize: 18, fontWeight: 700, margin: '4px 0 0', color: 'var(--or-text)' }}>
-          {Number(product.priceWt).toFixed(2)} €
+          <ProductPrice id={product.id} defaultPriceWt={product.priceWt} />
         </p>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

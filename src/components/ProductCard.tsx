@@ -6,6 +6,7 @@ import { useLocale } from '@/lib/locale-context';
 import ProductPlayButton from './ProductPlayButton';
 import ProductBadges from './ProductBadges';
 import ProductCardCartButton from './ProductCardCartButton';
+import ProductPrice from './ProductPrice';
 
 interface Props {
   product: PrestaProduct;
@@ -66,7 +67,7 @@ export default function ProductCard({ product }: Props) {
         background: '#f1f1f1',
       }}>
         <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--or-text)', margin: 0, flex: 1 }}>
-          {Number(product.priceWt).toFixed(2)} €
+          <ProductPrice id={product.id} defaultPriceWt={product.priceWt} />
         </p>
         <ProductPlayButton
           productId={product.id}

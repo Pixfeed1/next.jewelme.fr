@@ -4,6 +4,7 @@ import ProductBadges from '@/components/ProductBadges';
 import ProductSamplePlaylist from '@/components/ProductSamplePlaylist';
 import ProductCrossSell from '@/components/ProductCrossSell';
 import AddToCartBox from '@/components/AddToCartBox';
+import ProductDetailPrice from '@/components/ProductDetailPrice';
 import MailAlertForm from '@/components/MailAlertForm';
 import ShopExtras from '@/components/ShopExtras';
 import Link from 'next/link';
@@ -117,12 +118,7 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
             coverUrl={product.idDefaultImage ? getProductImageUrl(product.id, product.idDefaultImage) : undefined}
             variant="button-only"
           />
-          <p style={{ fontSize: 30, fontWeight: 700, color: 'var(--or-green)', margin: 0, marginBottom: 4 }}>
-            {product.priceWt.toFixed(2)} €
-          </p>
-          <p style={{ fontSize: 12, color: '#888', margin: 0, marginBottom: 24 }}>
-            {locale === 'en' ? 'Incl. VAT plus Shipping Costs' : 'TTC, hors frais de port'}
-          </p>
+          <ProductDetailPrice id={product.id} defaultPriceWt={product.priceWt} locale={locale} />
           <AddToCartBox product={product} />
           {(product.quantity ?? 0) <= 0 && (
             <MailAlertForm idProduct={product.id} productName={product.name} />

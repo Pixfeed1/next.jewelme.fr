@@ -4,6 +4,7 @@ import Footer from '@/components/Footer';
 import { PlayerProvider } from '@/lib/player-context';
 import { CartProvider } from '@/lib/cart-context';
 import { AuthProvider } from '@/lib/auth-context';
+import { CustomerPricesProvider } from '@/lib/customer-prices-context';
 import CartSidePanel from '@/components/CartSidePanel';
 import { cookies } from 'next/headers';
 import { LocaleProvider, type Locale } from '@/lib/locale-context';
@@ -49,15 +50,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <LocaleProvider initialLocale={initialLocale}>
           <AuthProvider>
             <CartProvider>
-              <PlayerProvider>
-                <Header />
-                <main className="site-main" style={{ width: '100%', maxWidth: 1650, margin: '0 auto' }}>
-                  {children}
-                </main>
-                <Footer />
-                <PersistentPlayer />
-              </PlayerProvider>
-              <CartSidePanel />
+              <CustomerPricesProvider>
+                <PlayerProvider>
+                  <Header />
+                  <main className="site-main" style={{ width: '100%', maxWidth: 1650, margin: '0 auto' }}>
+                    {children}
+                  </main>
+                  <Footer />
+                  <PersistentPlayer />
+                </PlayerProvider>
+                <CartSidePanel />
+              </CustomerPricesProvider>
             </CartProvider>
           </AuthProvider>
         </LocaleProvider>

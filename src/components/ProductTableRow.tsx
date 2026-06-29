@@ -5,6 +5,7 @@ import { productUrl } from '@/lib/url-builder';
 import { useLocale } from '@/lib/locale-context';
 import ProductPlayButton from './ProductPlayButton';
 import ProductCardCartButton from './ProductCardCartButton';
+import ProductPrice from './ProductPrice';
 
 interface Props { product: PrestaProduct; }
 
@@ -27,7 +28,7 @@ export default function ProductTableRow({ product }: Props) {
         </Link>
       </td>
       <td style={{ padding: 8, fontSize: 12, color: 'var(--or-text-muted)' }}>{product.reference}</td>
-      <td style={{ padding: 8, fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap' }}>{Number(product.priceWt).toFixed(2)} €</td>
+      <td style={{ padding: 8, fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap' }}><ProductPrice id={product.id} defaultPriceWt={product.priceWt} /></td>
       <td style={{ padding: 8, textAlign: 'right' }}>
         <div style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
           <ProductPlayButton productId={product.id} productName={product.name} productLink={productLink} coverUrl={imageUrl} size={32} variant="inline" />
