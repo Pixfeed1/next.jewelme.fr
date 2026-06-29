@@ -5,12 +5,14 @@ import { useAuth } from '@/lib/auth-context';
 import { useLocale } from '@/lib/locale-context';
 import { useT } from '@/lib/i18n';
 import { localeHref } from '@/lib/url-builder';
+import { useCustomerAddresses } from '@/lib/customer-addresses';
 
 export default function MonCompteView() {
   const { user, loading, logout } = useAuth();
   const { locale } = useLocale();
   const t = useT();
   const router = useRouter();
+  const { addresses, loading: addressesLoading } = useCustomerAddresses();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -68,6 +70,30 @@ export default function MonCompteView() {
             {user.newsletter ? t('account_newsletter_on') : t('account_newsletter_off')}
           </strong>
         </div>
+      </div>
+
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+          {t('account_addresses')}
+        </h2>
+        {addressesLoading ? (
+          <p style={{ color: '#888', fontSize: 14 }}>…</p>
+        ) : addresses.length === 0 ? (
+          <p style={{ color: '#888', fontSize: 14 }}>{t('account_no_address')}</p>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
+            {addresses.map((a) => (
+              <div key={a.id_address} style={{ background: '#fff', border: '1px solid #e5e0d6', borderRadius: 4, padding: '14px 16px', fontSize: 14, lineHeight: 1.5 }}>
+                {a.alias && <div style={{ fontWeight: 700, marginBottom: 4 }}>{a.alias}</div>}
+                <div>{a.firstname} {a.lastname}</div>
+                <div>{a.address1}</div>
+                {a.address2 && <div>{a.address2}</div>}
+                <div>{a.postcode} {a.city}</div>
+                {(a.phone || a.phone_mobile) && <div style={{ color: '#888', marginTop: 4 }}>{a.phone || a.phone_mobile}</div>}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
