@@ -88,7 +88,8 @@ iframe[id*="brevo-conversations-launcher"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 20px;
+    gap: 8px;
+    padding: 11px 18px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 14px;
     font-weight: 600;
@@ -100,7 +101,10 @@ iframe[id*="brevo-conversations-launcher"] {
 }
 .orp-chat-fab:hover { background: var(--orp-chat-bg-hover); }
 .orp-chat-fab:active { transform: scale(0.97); }
-.orp-chat-fab-label { display: block; }
+.orp-chat-fab-icon { display: block; flex-shrink: 0; }
+/* Desktop : libelle complet ; mobile : libelle court ("Message") */
+.orp-chat-fab-full { display: inline; }
+.orp-chat-fab-short { display: none; }
 
 /* CONTRAINTE MOBILE : ne jamais recouvrir le lecteur. Quand le lecteur est
    visible, body recoit .orp-player-active ; on remonte le bouton au-dessus de
@@ -131,4 +135,6 @@ iframe[title*="hat button"] {
     .orp-chat-fab { right: 16px; bottom: 16px; padding: 11px 16px; font-size: 13px; }
     /* Lecteur visible en mobile : padding de 64px -> on remonte de 64 + 16 */
     body.orp-player-active .orp-chat-fab { bottom: 80px; }
+    .orp-chat-fab-full { display: none; }
+    .orp-chat-fab-short { display: inline; }
 }
