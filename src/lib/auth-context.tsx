@@ -73,10 +73,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string): Promise<AuthResult> => {
     try {
+      // Token du panier invite : permet au backend de rattacher le cart au client.
+      const cartToken = typeof window !== 'undefined'
+        ? (localStorage.getItem('pixfeed_cart_token') || '')
+        : '';
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, cart_token: cartToken }),
       });
       const d = await res.json();
       if (res.ok && d.success && d.user) {

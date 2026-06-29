@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { homeUrl, localeHref, cmsUrl } from '@/lib/url-builder';
 import { useCart } from '@/lib/cart-context';
 import { useAuth } from '@/lib/auth-context';
+import { useCustomerAddresses, type CustomerAddress } from '@/lib/customer-addresses';
 import { useLocale } from '@/lib/locale-context';
 import { trackBeginCheckout } from '@/lib/gtag';
 import { useT } from '@/lib/i18n';
@@ -40,11 +41,24 @@ const emptyAddr = (idCountry = 8): AddressForm => ({
   postcode: '', city: '', id_country: idCountry, phone: '',
 });
 
+/** Mappe une adresse enregistrée du client vers le formulaire de checkout. */
+const addrToForm = (a: CustomerAddress, fallbackCountry = 8): AddressForm => ({
+  alias: a.alias || 'Mon adresse',
+  company: '',
+  address1: a.address1,
+  address2: a.address2,
+  postcode: a.postcode,
+  city: a.city,
+  id_country: a.id_country || fallbackCountry,
+  phone: a.phone || a.phone_mobile || '',
+});
+
 export default function CheckoutPage() {
   const { locale } = useLocale();
   const t = useT();
   const { cart, refresh } = useCart();
   const { user } = useAuth();
+  const { addresses: savedAddresses } = useCustomerAddresses();
 
   // GA4 : begin_checkout
   useEffect(() => {
@@ -74,6 +88,8 @@ export default function CheckoutPage() {
   const [deliveryAddr, setDeliveryAddr] = useState<AddressForm>(emptyAddr());
   const [useSameAddress, setUseSameAddress] = useState(true);
   const [invoiceAddr, setInvoiceAddr] = useState<AddressForm>(emptyAddr());
+  // Adresse enregistree selectionnee (client connecte) : id, ou 'new' pour saisie manuelle
+  const [selectedAddressId, setSelectedAddressId] = useState<number | 'new' | null>(null);
 
   // Step 3 - shipping
   const [carriers, setCarriers] = useState<Carrier[]>([]);
@@ -114,6 +130,17 @@ export default function CheckoutPage() {
       setLastname(user.lastname);
     }
   }, [user]);
+
+  // Client connecté avec adresses enregistrées : pré-sélectionne la première
+  // (l'utilisateur peut basculer sur une autre ou saisir une nouvelle adresse).
+  useEffect(() => {
+    if (!init) return;
+    if (savedAddresses.length > 0 && selectedAddressId === null) {
+      setSelectedAddressId(savedAddresses[0].id_address);
+      setDeliveryAddr(addrToForm(savedAddresses[0], init.default_country));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedAddresses, init]);
 
   // Load carriers when entering step 3
   useEffect(() => {
@@ -306,6 +333,39 @@ export default function CheckoutPage() {
           {step === 2 && init && (
             <section style={sectionStyle}>
               <h2 style={h2Style}>{t('address')}</h2>
+
+              {savedAddresses.length > 0 && (
+                <div style={{ marginBottom: 24 }}>
+                  <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 8, color: '#555' }}>{t('saved_addresses')}</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {savedAddresses.map((a) => (
+                      <label key={a.id_address} style={{
+                        display: 'flex', alignItems: 'flex-start', gap: 10, padding: 12,
+                        border: selectedAddressId === a.id_address ? '2px solid #3f6e51' : '1px solid #e5e0d6',
+                        borderRadius: 4, cursor: 'pointer', background: selectedAddressId === a.id_address ? '#f0f7f2' : '#fff', fontSize: 13,
+                      }}>
+                        <input type="radio" name="saved-addr" checked={selectedAddressId === a.id_address}
+                          onChange={() => { setSelectedAddressId(a.id_address); setDeliveryAddr(addrToForm(a, init.default_country)); }}
+                          style={{ marginTop: 2 }} />
+                        <span>
+                          {a.alias && <strong>{a.alias} — </strong>}
+                          {a.address1}{a.address2 ? `, ${a.address2}` : ''}, {a.postcode} {a.city}
+                        </span>
+                      </label>
+                    ))}
+                    <label style={{
+                      display: 'flex', alignItems: 'center', gap: 10, padding: 12,
+                      border: selectedAddressId === 'new' ? '2px solid #3f6e51' : '1px solid #e5e0d6',
+                      borderRadius: 4, cursor: 'pointer', background: selectedAddressId === 'new' ? '#f0f7f2' : '#fff', fontSize: 13,
+                    }}>
+                      <input type="radio" name="saved-addr" checked={selectedAddressId === 'new'}
+                        onChange={() => { setSelectedAddressId('new'); setDeliveryAddr(emptyAddr(init.default_country)); }} />
+                      <span>{t('new_address')}</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
               <AddressFields addr={deliveryAddr} setAddr={setDeliveryAddr} countries={init.countries} />
 
               <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 20, fontSize: 13, cursor: 'pointer' }}>

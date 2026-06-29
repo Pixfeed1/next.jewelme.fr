@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const r = await fetch(authControllerUrl('auth_login'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: body.email, password: body.password }),
+      body: JSON.stringify({ email: body.email, password: body.password, cart_token: body.cart_token }),
       cache: 'no-store',
     });
     const data = await r.json();
