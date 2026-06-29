@@ -19,8 +19,8 @@
     --orp-playing-bg: #3f6e51;
     --orp-playing-bg-hover: #335a42;
     /* Couleur dediee au bouton chat flottant, distincte du lecteur */
-    --orp-chat-bg: #0b7285;
-    --orp-chat-bg-hover: #095c6b;
+    --orp-chat-bg: #57a773;
+    --orp-chat-bg-hover: #4a9162;
 }
 .orp-player { position: fixed; bottom: 0; left: 0; right: 0; height: var(--orp-height); background: var(--orp-bg); color: var(--orp-text); z-index: var(--orp-z);  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; }
 .orp-player-inner { display: flex; align-items: center; height: 100%; padding: 0 16px; gap: 16px; }
