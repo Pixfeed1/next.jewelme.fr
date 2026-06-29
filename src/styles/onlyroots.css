@@ -851,6 +851,13 @@ body { overflow-x: clip; max-width: 100%; }
    peut plus scroller). */
 .category-layout > * { min-width: 0; }
 
+/* Sur petits ecrans (telephones) la vue liste/tableau n'a pas d'interet et
+   debordait : on masque le selecteur de vue et on ne garde que les vignettes
+   (la grille est la vue par defaut). */
+@media (max-width: 480px) {
+  .view-switcher { display: none !important; }
+}
+
 @media (max-width: 768px) {
   .site-main { padding: 16px 12px; }
   /* Layout categorie/recherche : sidebar empilee au-dessus du contenu */
