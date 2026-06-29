@@ -425,6 +425,12 @@ a { color: inherit; }
   #header .header-action-link span { display: none; }
   /* Logo plus petit sur mobile */
   #header img { height: 56px !important; }
+  /* Header (logo + moteur de recherche) reste colle en haut au scroll */
+  #header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
 }
 
 @media (max-width: 480px) {
@@ -751,9 +757,10 @@ a { color: inherit; }
   }
 }
 
-/* ============ Cacher Mon compte + Langue du header sur mobile ============ */
+/* ============ Cacher la Langue du header sur mobile ============ */
+/* Le lien compte (icone personne) reste visible a droite, a cote du panier ;
+   seul le selecteur de langue est masque (dispo dans le drawer). */
 @media (max-width: 768px) {
-  #header a.header-action-link,
   #header > div > div > div > .locale-switcher {
     display: none !important;
   }
