@@ -18,6 +18,7 @@ interface OrderData {
   customer: { email: string; firstname: string; lastname: string };
   delivery_address: any; invoice_address: any;
   carrier: { id: number; name: string };
+  bankwire?: { owner: string; details: string; address: string } | null;
   items: Item[];
 }
 
@@ -77,6 +78,14 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ r
             <strong>{order!.payment}</strong><br />
             <span style={{ color: '#666' }}>Vous recevrez les instructions par email pour finaliser le règlement.</span>
           </p>
+          {order!.bankwire && (
+            <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #f0ece4', fontSize: 13, lineHeight: 1.6 }}>
+              <strong style={{ display: 'block', marginBottom: 6 }}>Coordonnées bancaires</strong>
+              <span style={{ color: '#666' }}>Titulaire :</span> {order!.bankwire.owner}<br />
+              {order!.bankwire.address && <><span style={{ color: '#666' }}>Banque :</span> {order!.bankwire.address}<br /></>}
+              <span style={{ whiteSpace: 'pre-line' }}>{order!.bankwire.details}</span>
+            </div>
+          )}
         </div>
       </div>
 
