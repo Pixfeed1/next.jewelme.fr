@@ -1,7 +1,13 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './auth-context';
 import { useCart } from './cart-context';
+
+/** Token du panier (rattache au client apres login). Lecture cote client. */
+export function getCartToken(): string {
+  if (typeof window === 'undefined') return '';
+  return localStorage.getItem('pixfeed_cart_token') || '';
+}
 
 export interface CustomerAddress {
   id_address: number;
@@ -43,6 +49,9 @@ export function useCustomerAddresses() {
   const token = cart?.token || '';
   const [addresses, setAddresses] = useState<CustomerAddress[]>([]);
   const [loading, setLoading] = useState(false);
+  const [nonce, setNonce] = useState(0);
+
+  const reload = useCallback(() => setNonce((n) => n + 1), []);
 
   useEffect(() => {
     if (!user || !token) {
@@ -64,7 +73,7 @@ export function useCustomerAddresses() {
       .catch(() => { if (!cancelled) setAddresses([]); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [user, token]);
+  }, [user, token, nonce]);
 
-  return { addresses, loading };
+  return { addresses, loading, reload };
 }

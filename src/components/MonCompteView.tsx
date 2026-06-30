@@ -1,18 +1,30 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { useLocale } from '@/lib/locale-context';
-import { useT } from '@/lib/i18n';
+import { useT, type TranslationKey } from '@/lib/i18n';
 import { localeHref } from '@/lib/url-builder';
-import { useCustomerAddresses } from '@/lib/customer-addresses';
+import AccountProfile from '@/components/account/AccountProfile';
+import AccountOrders from '@/components/account/AccountOrders';
+import AccountAddresses from '@/components/account/AccountAddresses';
+import AccountVouchers from '@/components/account/AccountVouchers';
+
+type Tab = 'profile' | 'orders' | 'addresses' | 'vouchers';
+
+const TABS: { key: Tab; label: TranslationKey }[] = [
+  { key: 'profile', label: 'account_tab_profile' },
+  { key: 'orders', label: 'account_tab_orders' },
+  { key: 'addresses', label: 'account_tab_addresses' },
+  { key: 'vouchers', label: 'account_tab_vouchers' },
+];
 
 export default function MonCompteView() {
   const { user, loading, logout } = useAuth();
   const { locale } = useLocale();
   const t = useT();
   const router = useRouter();
-  const { addresses, loading: addressesLoading } = useCustomerAddresses();
+  const [tab, setTab] = useState<Tab>('profile');
 
   useEffect(() => {
     if (!loading && !user) {
@@ -32,84 +44,41 @@ export default function MonCompteView() {
     router.refresh();
   };
 
-  const memberSince = user.date_add
-    ? new Date(user.date_add).toLocaleDateString(locale === 'en' ? 'en-GB' : 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
-    : '';
-
-  const rowStyle: React.CSSProperties = { display: 'flex', justifyContent: 'space-between', gap: 16, padding: '12px 0', borderBottom: '1px solid #f0ece4', fontSize: 14 };
-  const btnStyle: React.CSSProperties = {
-    padding: '12px 20px', borderRadius: 4, fontSize: 13, fontWeight: 600, textAlign: 'center',
-    textTransform: 'uppercase', letterSpacing: '0.04em', cursor: 'pointer', border: 0,
-  };
-
   return (
-    <div style={{ maxWidth: 640, margin: '20px auto', padding: '0 16px' }}>
-      <h1 style={{ fontSize: 26, fontWeight: 700, margin: '0 0 4px' }}>{t('account_title')}</h1>
-      <p style={{ color: '#666', marginBottom: 24, fontSize: 15 }}>
-        {t('account_hello')} {user.firstname} 👋
-      </p>
-
-      <div style={{ background: '#fff', border: '1px solid #e5e0d6', borderRadius: 4, padding: '8px 20px', marginBottom: 24 }}>
-        <div style={rowStyle}>
-          <span style={{ color: '#888' }}>{t('auth_firstname')} / {t('auth_lastname')}</span>
-          <strong>{user.firstname} {user.lastname}</strong>
+    <div style={{ maxWidth: 820, margin: '20px auto', padding: '0 16px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <h1 style={{ fontSize: 26, fontWeight: 700, margin: '0 0 4px' }}>{t('account_title')}</h1>
+          <p style={{ color: '#666', marginBottom: 16, fontSize: 15 }}>
+            {t('account_hello')} {user.firstname} 👋
+          </p>
         </div>
-        <div style={rowStyle}>
-          <span style={{ color: '#888' }}>Email</span>
-          <strong>{user.email}</strong>
-        </div>
-        {memberSince && (
-          <div style={rowStyle}>
-            <span style={{ color: '#888' }}>{t('account_member_since')}</span>
-            <strong>{memberSince}</strong>
-          </div>
-        )}
-        <div style={{ ...rowStyle, borderBottom: 0 }}>
-          <span style={{ color: '#888' }}>Newsletter</span>
-          <strong style={{ color: user.newsletter ? '#3f6e51' : '#999' }}>
-            {user.newsletter ? t('account_newsletter_on') : t('account_newsletter_off')}
-          </strong>
-        </div>
-      </div>
-
-      <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 700, margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          {t('account_addresses')}
-        </h2>
-        {addressesLoading ? (
-          <p style={{ color: '#888', fontSize: 14 }}>…</p>
-        ) : addresses.length === 0 ? (
-          <p style={{ color: '#888', fontSize: 14 }}>{t('account_no_address')}</p>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 12 }}>
-            {addresses.map((a) => (
-              <div key={a.id_address} style={{ background: '#fff', border: '1px solid #e5e0d6', borderRadius: 4, padding: '14px 16px', fontSize: 14, lineHeight: 1.5 }}>
-                {a.alias && <div style={{ fontWeight: 700, marginBottom: 4 }}>{a.alias}</div>}
-                <div>{a.firstname} {a.lastname}</div>
-                <div>{a.address1}</div>
-                {a.address2 && <div>{a.address2}</div>}
-                <div>{a.postcode} {a.city}</div>
-                {(a.phone || a.phone_mobile) && <div style={{ color: '#888', marginTop: 4 }}>{a.phone || a.phone_mobile}</div>}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <button type="button" disabled title={t('account_coming_soon')}
-          style={{ ...btnStyle, background: '#f0f0f0', color: '#888', border: '1px solid #ddd', cursor: 'default' }}>
-          {t('account_edit_info')}
-        </button>
-        <button type="button" disabled title={t('account_coming_soon')}
-          style={{ ...btnStyle, background: '#f0f0f0', color: '#888', border: '1px solid #ddd', cursor: 'default' }}>
-          {t('account_my_orders')}
-        </button>
         <button type="button" onClick={handleLogout}
-          style={{ ...btnStyle, background: '#1a1a1a', color: '#fff' }}>
+          style={{ padding: '10px 18px', borderRadius: 4, fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em', cursor: 'pointer', border: 0, background: '#1a1a1a', color: '#fff' }}>
           {t('logout')}
         </button>
       </div>
+
+      {/* Onglets */}
+      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', borderBottom: '1px solid #e5e0d6', marginBottom: 24 }}>
+        {TABS.map(({ key, label }) => (
+          <button key={key} type="button" onClick={() => setTab(key)}
+            style={{
+              padding: '10px 16px', border: 0, background: 'none', cursor: 'pointer',
+              fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.04em',
+              color: tab === key ? '#1a1a1a' : '#999',
+              borderBottom: tab === key ? '2px solid #1a1a1a' : '2px solid transparent',
+              marginBottom: -1,
+            }}>
+            {t(label)}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'profile' && <AccountProfile />}
+      {tab === 'orders' && <AccountOrders />}
+      {tab === 'addresses' && <AccountAddresses />}
+      {tab === 'vouchers' && <AccountVouchers />}
     </div>
   );
 }

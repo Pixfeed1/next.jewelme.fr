@@ -26,6 +26,19 @@ export function authControllerUrl(controller: string, extra: Record<string, stri
   return `${PRESTA_BASE}/index.php?${params.toString()}`;
 }
 
+/**
+ * POST JSON vers un controller du module (ws_key cote serveur).
+ * Renvoie la Response brute (le routeur decide JSON vs binaire/PDF).
+ */
+export function postController(controller: string, payload: Record<string, unknown>): Promise<Response> {
+  return fetch(authControllerUrl(controller), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    cache: 'no-store',
+  });
+}
+
 /** Ne renvoie au client que le profil public (jamais le secure_key). */
 export function stripUser(d: Record<string, unknown>) {
   return {
