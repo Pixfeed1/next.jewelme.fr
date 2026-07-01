@@ -11,7 +11,7 @@ export default function ConnexionForm({ locale }: { locale: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
-  const from = searchParams.get('from') || homeUrl(locale);
+  const from = searchParams.get('from') || localeHref('/mon-compte', locale);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

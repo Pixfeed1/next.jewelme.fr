@@ -6,6 +6,7 @@ import { getProductImageUrl } from '@/lib/presta';
 import { homeUrl } from '@/lib/url-builder';
 import { decodeHtmlEntities } from '@/lib/text-utils';
 import TrackPurchase from '@/components/TrackPurchase';
+import ClearCartOnPaid from '@/components/ClearCartOnPaid';
 
 const PRESTA_API_URL = process.env.PRESTA_API_URL || 'https://www.onlyroots-reggae.com';
 const PRESTA_API_KEY = process.env.PRESTA_API_KEY || 'FHREYMY1XYM8UBZW2EIJ7WUQWT36TBQG';
@@ -46,6 +47,7 @@ export default async function ConfirmationPage({ params }: { params: Promise<{ r
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 16px' }}>
       <TrackPurchase reference={order!.reference} total={order!.total_paid} items={order!.items} />
+      <ClearCartOnPaid />
       <div style={{ background: '#e8f0ea', padding: 32, borderRadius: 4, textAlign: 'center', marginBottom: 32 }}>
         <div style={{ fontSize: 48, marginBottom: 12 }}>✓</div>
         <h1 style={{ fontSize: 26, fontWeight: 700, margin: '0 0 8px', color: '#3f6e51' }}>Merci pour votre commande !</h1>
