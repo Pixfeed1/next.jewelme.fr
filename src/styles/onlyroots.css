@@ -699,17 +699,23 @@ a { color: inherit; }
 }
 
 /* ============ Scroll-top button ============ */
+/* Empile au-dessus du bouton chat Brevo (bas-droite) pour ne pas le chevaucher,
+   et remonte avec lui quand le lecteur audio est ouvert. */
 .scroll-top-button {
-  position: fixed; bottom: 100px; right: 16px; z-index: 100;
+  position: fixed; bottom: 76px; right: 20px; z-index: 200;
   width: 44px; height: 44px; border-radius: 50%; border: none;
   background: #1a1a1a; color: #fff; cursor: pointer;
   box-shadow: 0 2px 12px rgba(0,0,0,0.3);
   display: flex; align-items: center; justify-content: center;
-  transition: background 0.2s;
+  transition: background 0.2s, bottom .25s ease;
 }
 .scroll-top-button:hover { background: #e8a838; }
+/* Lecteur ouvert : le bouton Brevo passe a bottom:100px -> on empile encore au-dessus. */
+body.orp-player-active .scroll-top-button { bottom: 156px; }
 @media (max-width: 768px) {
-  .scroll-top-button { bottom: 84px; right: 12px; width: 40px; height: 40px; }
+  .scroll-top-button { bottom: 68px; right: 16px; width: 40px; height: 40px; }
+  /* Lecteur mobile : Brevo a bottom:80px -> scroll-top au-dessus. */
+  body.orp-player-active .scroll-top-button { bottom: 132px; }
 }
 
 /* ============ LocaleSwitcher responsive ============ */

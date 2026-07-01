@@ -95,7 +95,9 @@ iframe[id*="brevo-conversations-launcher"] {
     font-weight: 600;
     line-height: 1;
     white-space: nowrap;
-    z-index: calc(var(--orp-z) + 1);
+    /* Sous le panier lateral (1001), les drawers (9998/9999) et les popups
+       (10000) pour ne jamais bloquer leurs clics ; au-dessus du contenu. */
+    z-index: 900;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
     transition: background-color .15s ease, transform .1s ease, bottom .25s ease;
 }
