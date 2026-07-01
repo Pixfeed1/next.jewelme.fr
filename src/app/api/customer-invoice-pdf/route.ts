@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { postController } from '@/lib/auth-server';
+import { cookies } from 'next/headers';
+import { postController, AUTH_COOKIE } from '@/lib/auth-server';
 
 // Facture PDF d'une commande (le backend verifie l'appartenance) -> application/pdf.
 export async function POST(req: NextRequest) {
@@ -7,10 +8,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const token = String(body.token || '');
     const id_order = body.id_order;
-    if (!token || !id_order) {
+    const customerToken = (await cookies()).get(AUTH_COOKIE)?.value || '';
+    if ((!token && !customerToken) || !id_order) {
       return NextResponse.json({ success: false, error: 'missing params' }, { status: 400 });
     }
-    const r = await postController('customer_invoice_pdf', { token, id_order });
+    const r = await postController('customer_invoice_pdf', { token, customer_token: customerToken, id_order });
     const contentType = r.headers.get('content-type') || '';
     if (!r.ok || !contentType.includes('pdf')) {
       // Erreur backend (JSON) : on la relaie telle quelle
