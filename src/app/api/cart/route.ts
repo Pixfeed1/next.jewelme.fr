@@ -11,9 +11,10 @@ export async function GET(req: NextRequest) {
   const locale = cookieStore.get('locale')?.value;
   const idLang = locale === 'en' ? 2 : 1;
   const token = req.nextUrl.searchParams.get('token');
+  const customerToken = cookieStore.get('pixfeed_auth')?.value || '';
   if (!token) return NextResponse.json({ error: 'Missing token' }, { status: 400 });
   try {
-    const res = await fetch(`${BASE}/headless/cart?token=${encodeURIComponent(token)}&ws_key=${PRESTA_API_KEY}&id_lang=${idLang}`, { cache: 'no-store' });
+    const res = await fetch(`${BASE}/headless/cart?token=${encodeURIComponent(token)}&ws_key=${PRESTA_API_KEY}&id_lang=${idLang}&customer_token=${encodeURIComponent(customerToken)}`, { cache: 'no-store' });
     const data = await res.json();
     const out = res.ok ? await enrichCartWithStock(data) : data;
     return NextResponse.json(out, { status: res.status });

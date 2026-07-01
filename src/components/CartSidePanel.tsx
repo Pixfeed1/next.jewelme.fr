@@ -24,6 +24,7 @@ export default function CartSidePanel() {
   }, [panelOpen, closePanel]);
 
   const fmt = (n: number) => n.toFixed(2).replace('.', ',') + '\u00a0' + (cart?.currency?.symbol ?? '€');
+  const displayHt = cart?.totals?.display_ht ?? false;
   const tax = cart ? (cart.totals.total - (cart.totals.subtotal ?? 0)) : 0;
   const itemCount = cart?.item_count ?? 0;
 
@@ -117,18 +118,18 @@ export default function CartSidePanel() {
           <div style={{ padding: '16px', borderTop: '1px solid #e5e0d6', background: '#f5f0e8' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
               <span style={{ color: '#666' }}>{t('subtotal')}</span>
-              <span style={{ color: '#333' }}>{fmt(cart.totals.subtotal ?? 0)}</span>
+              <span style={{ color: '#333' }}>{fmt(displayHt ? (cart.totals.subtotal ?? 0) : (cart.totals.subtotal_wt ?? 0))}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
               <span style={{ color: '#666' }}>Livraison</span>
               <span style={{ color: '#333' }}>{fmt(cart.totals.shipping)}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, fontWeight: 700, padding: '8px 0 4px', borderTop: '1px solid #e5e0d6', marginTop: 4 }}>
-              <span>{t('total_ttc')}</span>
+              <span>{displayHt ? 'Total HT' : t('total_ttc')}</span>
               <span>{fmt(cart.totals.total)}</span>
             </div>
             <div style={{ textAlign: 'right', fontSize: 11, color: '#888', fontStyle: 'italic', marginBottom: 14 }}>
-              TVA incluse plus frais d&apos;envoi : {fmt(tax)}
+              {displayHt ? `TVA : ${fmt(tax)}` : `TVA incluse plus frais d'envoi : ${fmt(tax)}`}
             </div>
 
             <a href={localeHref('/panier', locale)} onClick={closePanel}

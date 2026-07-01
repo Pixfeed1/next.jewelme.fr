@@ -27,6 +27,7 @@ export interface CartTotals {
   shipping: number;
   total: number;
   tax?: number;
+  display_ht?: boolean;
   discounts?: number;
 }
 
