@@ -51,9 +51,11 @@ export default function ProductCardCartButton({ idProduct, name, price, quantity
         alignItems: 'center',
         justifyContent: 'center',
         padding: 0,
-        background: outOfStock ? '#b0b0b0' : (success ? '#3f6e51' : '#a3a2a2'),
+        background: outOfStock ? '#d6d6d6' : (success ? '#3f6e51' : '#a3a2a2'),
         cursor: outOfStock ? 'default' : (pending ? 'wait' : 'pointer'),
         transition: 'background 0.25s ease',
+        opacity: outOfStock ? 0.35 : 1,
+        filter: outOfStock ? 'grayscale(100%)' : 'none',
       }}
     >
       {success ? (
