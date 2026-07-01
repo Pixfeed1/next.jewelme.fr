@@ -31,10 +31,17 @@ export function authControllerUrl(controller: string, extra: Record<string, stri
  * Renvoie la Response brute (le routeur decide JSON vs binaire/PDF).
  */
 export function postController(controller: string, payload: Record<string, unknown>): Promise<Response> {
+  // Le module PrestaShop lit les params via Tools::getValue (form-urlencoded),
+  // pas le JSON brut. On encode donc le payload en x-www-form-urlencoded.
+  const form = new URLSearchParams();
+  for (const [k, v] of Object.entries(payload)) {
+    if (v === undefined || v === null) continue;
+    form.set(k, typeof v === 'object' ? JSON.stringify(v) : String(v));
+  }
   return fetch(authControllerUrl(controller), {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: form.toString(),
     cache: 'no-store',
   });
 }
