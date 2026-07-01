@@ -78,6 +78,13 @@ export default function FilterSidebar({ groups }: Props) {
     setSelected({});
     pushFilters({});
   };
+  const resetGroup = (groupType: string) => {
+    setSelected(prev => {
+      const updated = { ...prev, [groupType]: [] };
+      pushFilters(updated);
+      return updated;
+    });
+  };
 
   const totalSelected = Object.values(selected).reduce((s, arr) => s + arr.length, 0);
 
@@ -115,6 +122,14 @@ export default function FilterSidebar({ groups }: Props) {
 
             {isOpen && (
               <div style={{ marginTop: 10, maxHeight: 280, overflowY: 'auto' }}>
+                {group.type === 'condition' && (
+                  <label
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0', cursor: 'pointer', fontSize: 13, color: (selected[group.type] ?? []).length === 0 ? '#333' : '#666' }}>
+                    <input type="checkbox" checked={(selected[group.type] ?? []).length === 0} onChange={() => resetGroup(group.type)}
+                      style={{ accentColor: '#333', cursor: 'pointer' }} />
+                    <span style={{ flex: 1, fontWeight: (selected[group.type] ?? []).length === 0 ? 600 : 400 }}>Tous</span>
+                  </label>
+                )}
                 {group.values.map((v: FilterValue) => {
                   const ids = v.ids && v.ids.length > 0 ? v.ids : [v.id];
                   const arr = (selected[group.type] ?? []).map(String);
