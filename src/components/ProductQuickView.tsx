@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { PrestaProduct, getProductImageUrl } from '@/lib/presta';
 import { productUrl } from '@/lib/url-builder';
@@ -22,7 +23,11 @@ export default function ProductQuickView({ product, open, onClose }: Props) {
   const [qty, setQty] = useState(1);
   const [pending, setPending] = useState(false);
   const [added, setAdded] = useState(false);
+  // Rendu du portail uniquement côté client (document.body absent au SSR).
+  const [mounted, setMounted] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => { setMounted(true); }, []);
 
   const outOfStock = (product.quantity ?? 0) <= 0;
   const maxQty = product.quantity && product.quantity > 0 ? product.quantity : 99;
@@ -45,7 +50,7 @@ export default function ProductQuickView({ product, open, onClose }: Props) {
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
   const imageUrl = product.idDefaultImage ? getProductImageUrl(product.id, product.idDefaultImage) : '';
   const detailsHref = product.url ?? productUrl(product, locale);
@@ -62,7 +67,7 @@ export default function ProductQuickView({ product, open, onClose }: Props) {
   const rowLabel: React.CSSProperties = { color: '#888', fontSize: 13, minWidth: 74, display: 'inline-block' };
   const rowValue: React.CSSProperties = { color: 'var(--or-text)', fontSize: 13, fontWeight: 500 };
 
-  return (
+  return createPortal(
     <div className="product-quickview-backdrop" onClick={onClose}>
       <div
         className="product-quickview-card"
@@ -152,6 +157,7 @@ export default function ProductQuickView({ product, open, onClose }: Props) {
           </Link>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
