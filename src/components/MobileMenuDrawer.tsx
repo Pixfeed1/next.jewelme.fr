@@ -128,14 +128,14 @@ export default function MobileMenuDrawer({ entries, locale, loginLabel }: Props)
                     )}
                     {allCategories.map((cat) => (
                       <Link key={'c-' + cat.id}
-                        href={categoryUrl({ id: cat.id, linkRewrite: (cat as any).link_rewrite || cat.name }, locale)}
+                        href={cat.url ? mapPrestaUrl(cat.url, locale) : categoryUrl({ id: cat.id, linkRewrite: (cat as any).link_rewrite || cat.name }, locale)}
                         className="mobile-menu-sublink" onClick={close}>
                         {cat.name}
                       </Link>
                     ))}
                     {allManufacturers.map((m) => (
                       <Link key={'m-' + m.id}
-                        href={manufacturerUrl({ id: m.id, name: m.name, linkRewrite: (m as any).link_rewrite }, locale)}
+                        href={m.url ? mapPrestaUrl(m.url, locale) : manufacturerUrl({ id: m.id, name: m.name, linkRewrite: (m as any).link_rewrite }, locale)}
                         className="mobile-menu-sublink" onClick={close}>
                         {m.name}
                       </Link>

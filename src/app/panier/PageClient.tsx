@@ -86,7 +86,7 @@ export default function CartPage() {
                   <div style={{ width: 70, height: 70, background: '#eee' }} />
                 )}
                 <div style={{ minWidth: 0 }}>
-                  <Link href={productUrl({ id: item.id_product, linkRewrite: item.link_rewrite }, locale)} style={{ fontSize: 12, color: '#444', textDecoration: 'none', lineHeight: 1.4, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                  <Link href={item.url ?? productUrl({ id: item.id_product, linkRewrite: item.link_rewrite }, locale)} style={{ fontSize: 12, color: '#444', textDecoration: 'none', lineHeight: 1.4, textTransform: 'uppercase', letterSpacing: '0.02em' }}>
                     {item.name}
                   </Link>
                   <div style={{ marginTop: 6, fontSize: 14, fontWeight: 700, color: '#333' }}>

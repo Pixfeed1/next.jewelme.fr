@@ -1,6 +1,7 @@
 import { fetchCategory, fetchProductsByIds } from '@/lib/presta';
 import { getServerT } from '@/lib/i18n';
 import { categoryUrl, homeUrl, idLangFromLocale } from '@/lib/url-builder';
+import { resolveUrls } from '@/lib/resolve-urls';
 import { fetchCategoryProductIdsWithFilters, parseFiltersFromSearchParams } from '@/lib/category-products';
 import { fetchFilters } from '@/lib/filters';
 import FilterSidebar from '@/components/FilterSidebar';
@@ -22,7 +23,8 @@ export async function categoryMetadata(idCat: number, locale: string): Promise<M
   const category = await fetchCategory(idCat, idLang);
   if (!category) return {};
   const cat = { id: category.id, linkRewrite: category.linkRewrite };
-  const url = categoryUrl(cat, locale);
+  const resolved = await resolveUrls([{ type: 'category', id: category.id }], idLang);
+  const url = resolved.get(`category:${category.id}`) ?? categoryUrl(cat, locale);
   const metaTitle = category.metaTitle || category.name;
   const metaDescription = category.metaDescription || '';
   return {
@@ -75,7 +77,8 @@ export default async function CategoryView({ id: idCat, locale, searchParams: sp
 
   const products = productIds.length > 0 ? await fetchProductsByIds(productIds, idLang) : [];
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
-  const catUrl = categoryUrl({ id: category.id, linkRewrite: category.linkRewrite }, locale);
+  const catUrlMap = await resolveUrls([{ type: 'category', id: category.id }], idLang);
+  const catUrl = catUrlMap.get(`category:${category.id}`) ?? categoryUrl({ id: category.id, linkRewrite: category.linkRewrite }, locale);
 
   return (
     <div>

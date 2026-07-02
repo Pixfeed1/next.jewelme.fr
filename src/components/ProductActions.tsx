@@ -19,7 +19,7 @@ export default function ProductActions({ product }: Props) {
       <ProductPlayButton
         productId={product.id}
         productName={product.name}
-        productLink={productUrl(product, locale)}
+        productLink={product.url ?? productUrl(product, locale)}
         coverUrl={coverUrl}
         size={56}
         variant="inline"

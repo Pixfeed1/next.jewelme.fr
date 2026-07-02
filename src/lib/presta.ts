@@ -307,6 +307,10 @@ export async function fetchProduct(id: number, language = 1): Promise<PrestaProd
     const features = await fetchProductFeatures(assocFeatures, language);
     product.features = features.filter((f) => f.name && f.value);
   }
+  // URL native Presta (resolve_urls) — comme withCategorySlugs pour les listes.
+  const urlMap = await resolveUrls([{ type: 'product', id: product.id }], language);
+  const resolvedUrl = urlMap.get(`product:${product.id}`);
+  if (resolvedUrl) product = { ...product, url: resolvedUrl };
   return product;
 }
 

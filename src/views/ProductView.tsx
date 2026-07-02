@@ -9,6 +9,7 @@ import MailAlertForm from '@/components/MailAlertForm';
 import ShopExtras from '@/components/ShopExtras';
 import Link from 'next/link';
 import { categoryUrl, productUrl, manufacturerUrl, homeUrl, idLangFromLocale } from '@/lib/url-builder';
+import { resolveUrls } from '@/lib/resolve-urls';
 import TrackViewItem from '@/components/TrackViewItem';
 import { notFound } from 'next/navigation';
 import { translations, type TranslationKey } from '@/lib/i18n';
@@ -18,7 +19,7 @@ export async function productMetadata(productId: number, locale: string): Promis
   const idLang = idLangFromLocale(locale);
   const product = await fetchProduct(productId, idLang);
   if (!product) return {};
-  const url = productUrl(product, locale);
+  const url = product.url ?? productUrl(product, locale);
   const metaTitle = product.metaTitle || product.name;
   const metaDescription = product.metaDescription || product.descriptionShort || '';
   const urlFr = productUrl(product, 'fr');
@@ -50,6 +51,19 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
     ? await fetchCategory(product.idCategoryDefault, idLang).catch(() => null)
     : null;
 
+  // URLs natives Presta (breadcrumb catégorie + lien label) résolues côté serveur.
+  const resolveItems: { type: string; id: number }[] = [];
+  if (category) resolveItems.push({ type: 'category', id: category.id });
+  if (product.idManufacturer > 0) resolveItems.push({ type: 'manufacturer', id: product.idManufacturer });
+  const urlMap = resolveItems.length ? await resolveUrls(resolveItems, idLang) : new Map<string, string>();
+  const productHref = product.url ?? productUrl(product, locale);
+  const categoryHref = category
+    ? (urlMap.get(`category:${category.id}`) ?? categoryUrl({ id: category.id, linkRewrite: category.linkRewrite }, locale))
+    : '';
+  const manufacturerHref = product.idManufacturer > 0
+    ? (urlMap.get(`manufacturer:${product.idManufacturer}`) ?? manufacturerUrl({ id: product.idManufacturer, name: product.manufacturerName }, locale))
+    : '';
+
   const hasLongDescription = product.description && product.description.trim().length > 0;
   const hasFeatures = product.features && product.features.length > 0;
 
@@ -66,7 +80,7 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
         {category && (
           <>
             <span style={{ color: '#ccc', margin: '0 8px' }}>›</span>
-            <Link href={categoryUrl({ id: category.id, linkRewrite: category.linkRewrite }, locale)} style={{ color: '#888', textDecoration: 'none' }}>
+            <Link href={categoryHref} style={{ color: '#888', textDecoration: 'none' }}>
               {category.name}
             </Link>
           </>
@@ -92,7 +106,7 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
           {product.manufacturerName && (
             <p style={{ color: '#666', fontSize: 14, marginBottom: 8, marginTop: 0 }}>
               {tr('label_word')} : {product.idManufacturer > 0 ? (
-                <Link href={manufacturerUrl({ id: product.idManufacturer, name: product.manufacturerName }, locale)} style={{ color: 'var(--or-text)', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid currentColor' }}>{product.manufacturerName}</Link>
+                <Link href={manufacturerHref} style={{ color: 'var(--or-text)', fontWeight: 500, textDecoration: 'none', borderBottom: '1px solid currentColor' }}>{product.manufacturerName}</Link>
               ) : (
                 <span style={{ color: 'var(--or-text)', fontWeight: 500 }}>{product.manufacturerName}</span>
               )}
@@ -114,7 +128,7 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
           <ProductSamplePlaylist
             productId={product.id}
             productName={product.name}
-            productLink={productUrl(product, locale)}
+            productLink={productHref}
             coverUrl={product.idDefaultImage ? getProductImageUrl(product.id, product.idDefaultImage) : undefined}
             variant="button-only"
           />
@@ -153,7 +167,7 @@ export default async function ProductView({ id, locale }: { id: number; locale: 
         <ProductSamplePlaylist
           productId={product.id}
           productName={product.name}
-          productLink={productUrl(product, locale)}
+          productLink={productHref}
           coverUrl={product.idDefaultImage ? getProductImageUrl(product.id, product.idDefaultImage) : undefined}
           variant="list-only"
         />

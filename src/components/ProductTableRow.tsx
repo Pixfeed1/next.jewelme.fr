@@ -14,7 +14,7 @@ export default function ProductTableRow({ product }: Props) {
   const imageUrl = product.idDefaultImage
     ? getProductImageUrl(product.id, product.idDefaultImage)
     : '';
-  const productLink = productUrl(product, locale);
+  const productLink = product.url ?? productUrl(product, locale);
   return (
     <tr style={{ borderBottom: '1px solid var(--or-grey-lighter)' }}>
       <td style={{ padding: 8, width: 48 }}>

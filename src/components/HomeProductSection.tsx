@@ -4,6 +4,7 @@ import type { PrestaProduct } from '@/lib/presta';
 import { fetchCategory } from '@/lib/presta';
 import type { SliderConfig } from '@/lib/headless-api';
 import { categoryUrl, idLangFromLocale } from '@/lib/url-builder';
+import { resolveUrls } from '@/lib/resolve-urls';
 import ProductCard from './ProductCard';
 import ProductCarousel from './ProductCarousel';
 
@@ -26,10 +27,14 @@ export default async function HomeProductSection({ title, products, sliderConfig
   if (products.length === 0) return null;
   const useCarousel = sliderConfig?.enabled === true;
   // Résout le link_rewrite de la catégorie pour construire l'URL SEO `/{id}-{rewrite}`
-  const category = categoryId ? await fetchCategory(categoryId, idLangFromLocale(locale)).catch(() => null) : null;
-  const viewAllHref = categoryId
-    ? categoryUrl({ id: categoryId, linkRewrite: category?.linkRewrite || '' }, locale)
-    : null;
+  const idLang = idLangFromLocale(locale);
+  const category = categoryId ? await fetchCategory(categoryId, idLang).catch(() => null) : null;
+  let viewAllHref: string | null = null;
+  if (categoryId) {
+    const map = await resolveUrls([{ type: 'category', id: categoryId }], idLang);
+    viewAllHref = map.get(`category:${categoryId}`)
+      ?? categoryUrl({ id: categoryId, linkRewrite: category?.linkRewrite || '' }, locale);
+  }
 
   return (
     <section style={{ marginBottom: 48 }}>

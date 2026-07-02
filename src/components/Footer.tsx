@@ -1,7 +1,8 @@
 import { fetchShopConfig } from '@/lib/shop-config';
 import { getServerT } from '@/lib/i18n';
 import { cookies } from 'next/headers';
-import { cmsUrl } from '@/lib/url-builder';
+import { cmsUrl, idLangFromLocale } from '@/lib/url-builder';
+import { resolveUrls } from '@/lib/resolve-urls';
 import NewsletterForm from './NewsletterForm';
 
 interface SocialInfo {
@@ -67,6 +68,10 @@ export default async function Footer() {
   // Frais de port offert (id=29) non traduit, on le retire du footer
   const cms_pages = allCmsPages.filter((p) => p.id !== 29);
   const socialEntries = Object.entries(social).filter(([_, url]) => !!url);
+  // URLs CMS natives Presta résolues côté serveur (fallback cmsUrl).
+  const cmsUrlMap = cms_pages.length > 0
+    ? await resolveUrls(cms_pages.map((p) => ({ type: 'cms', id: p.id })), idLangFromLocale(locale))
+    : new Map<string, string>();
 
   return (
     <footer id="footer" style={{ marginTop: 64 }}>
@@ -108,7 +113,7 @@ export default async function Footer() {
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {cms_pages.map((page) => (
                   <li key={page.id}>
-                    <a href={cmsUrl({ id: page.id, slug: page.link_rewrite }, locale)}
+                    <a href={cmsUrlMap.get(`cms:${page.id}`) ?? cmsUrl({ id: page.id, slug: page.link_rewrite }, locale)}
                       style={{ color: 'var(--or-grey-light)', textDecoration: 'none', fontSize: 14 }}>
                       {page.title}
                     </a>

@@ -11,10 +11,12 @@ interface SearchResult {
   slug: string;
   price: number;
   image_url: string;
+  /** URL native Presta résolue côté serveur (/api/search/suggest). */
+  url?: string;
 }
 
 function productUrl(r: SearchResult): string {
-  return `/${r.category_id}-${r.category_slug}/${r.id}-${r.slug}.html`;
+  return r.url ?? `/${r.category_id}-${r.category_slug}/${r.id}-${r.slug}.html`;
 }
 
 export default function SearchBox({ placeholder = 'Rechercher' }: { placeholder?: string }) {

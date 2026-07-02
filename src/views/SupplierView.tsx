@@ -1,6 +1,7 @@
 import { fetchSupplier, fetchProductsBySupplier } from '@/lib/presta';
 import { getServerT } from '@/lib/i18n';
 import { supplierUrl, homeUrl, idLangFromLocale } from '@/lib/url-builder';
+import { resolveUrls } from '@/lib/resolve-urls';
 import ProductCard from '@/components/ProductCard';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -12,11 +13,12 @@ export async function supplierMetadata(id: number, locale: string): Promise<Meta
   const s = await fetchSupplier(id, idLang);
   if (!s) return {};
   const sup = { id: s.id, name: s.name, linkRewrite: s.linkRewrite };
+  const resolvedMeta = await resolveUrls([{ type: 'supplier', id: s.id }], idLang);
   return {
     title: s.metaTitle || s.name,
     description: s.metaDescription || '',
     alternates: {
-      canonical: supplierUrl(sup, locale),
+      canonical: resolvedMeta.get(`supplier:${s.id}`) ?? supplierUrl(sup, locale),
       languages: { fr: supplierUrl(sup, 'fr'), en: supplierUrl(sup, 'en'), 'x-default': supplierUrl(sup, 'fr') },
     },
   };

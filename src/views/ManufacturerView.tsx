@@ -1,6 +1,7 @@
 import { fetchManufacturer, fetchProductsByIds } from '@/lib/presta';
 import { getServerT } from '@/lib/i18n';
 import { manufacturerUrl, homeUrl, idLangFromLocale } from '@/lib/url-builder';
+import { resolveUrls } from '@/lib/resolve-urls';
 import { fetchManufacturerProductIdsWithFilters, parseFiltersFromSearchParams } from '@/lib/category-products';
 import { fetchFiltersByManufacturer } from '@/lib/filters';
 import FilterSidebar from '@/components/FilterSidebar';
@@ -22,11 +23,12 @@ export async function manufacturerMetadata(id: number, locale: string): Promise<
   const m = await fetchManufacturer(id, idLang);
   if (!m) return {};
   const mfg = { id: m.id, name: m.name, linkRewrite: m.linkRewrite };
+  const resolvedMeta = await resolveUrls([{ type: 'manufacturer', id: m.id }], idLang);
   return {
     title: m.metaTitle || `${m.name} — OnlyRoots`,
     description: m.metaDescription || m.shortDescription || `Découvrez tous les produits du label ${m.name}`,
     alternates: {
-      canonical: manufacturerUrl(mfg, locale),
+      canonical: resolvedMeta.get(`manufacturer:${m.id}`) ?? manufacturerUrl(mfg, locale),
       languages: { fr: manufacturerUrl(mfg, 'fr'), en: manufacturerUrl(mfg, 'en'), 'x-default': manufacturerUrl(mfg, 'fr') },
     },
   };
@@ -60,7 +62,8 @@ export default async function ManufacturerView({ id, locale, searchParams: sp }:
 
   const products = productIds.length > 0 ? await fetchProductsByIds(productIds, idLang) : [];
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
-  const mUrl = manufacturerUrl({ id, name: manufacturer.name, linkRewrite: manufacturer.linkRewrite }, locale);
+  const mUrlMap = await resolveUrls([{ type: 'manufacturer', id }], idLang);
+  const mUrl = mUrlMap.get(`manufacturer:${id}`) ?? manufacturerUrl({ id, name: manufacturer.name, linkRewrite: manufacturer.linkRewrite }, locale);
 
   return (
     <div>

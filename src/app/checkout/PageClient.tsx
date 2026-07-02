@@ -20,7 +20,7 @@ const PAYBOX_ID = 'paybox';
 interface Country { id: number; iso: string; name: string; need_zip_code: boolean; zip_format: string; contains_states: boolean; }
 interface PaymentMethod { id: string; name: string; label: string; instructions: string; }
 interface Carrier { id: number; name: string; delay: string; price: number; price_str: string; logo: string | null; is_free: boolean; is_parcel_point?: boolean; networks?: string[]; }
-interface InitData { countries: Country[]; payment_methods: PaymentMethod[]; cgv: { id_cms: number; slug: string; title: string } | null; default_country: number; }
+interface InitData { countries: Country[]; payment_methods: PaymentMethod[]; cgv: { id_cms: number; slug: string; title: string; url?: string } | null; default_country: number; }
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -460,7 +460,7 @@ export default function CheckoutPage() {
                 <input type="checkbox" checked={acceptCgv} onChange={e => setAcceptCgv(e.target.checked)} style={{ marginTop: 3 }} />
                 <span>{t('i_accept_the')}{' '}
                   {init.cgv ? (
-                    <Link href={cmsUrl({ id: init.cgv.id_cms, slug: init.cgv.slug }, locale)} target="_blank" style={{ color: '#666', textDecoration: 'underline' }}>{init.cgv.title}</Link>
+                    <Link href={init.cgv.url ?? cmsUrl({ id: init.cgv.id_cms, slug: init.cgv.slug }, locale)} target="_blank" style={{ color: '#666', textDecoration: 'underline' }}>{init.cgv.title}</Link>
                   ) : t('cgv_link_text')}.</span>
               </label>
 

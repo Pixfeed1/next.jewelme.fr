@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { resolveUrls } from '@/lib/resolve-urls';
 const PRESTA_API_URL = process.env.PRESTA_API_URL || 'https://www.onlyroots-reggae.com';
 const PRESTA_API_KEY = process.env.PRESTA_API_KEY || 'FHREYMY1XYM8UBZW2EIJ7WUQWT36TBQG';
 
@@ -10,6 +11,12 @@ export async function GET() {
   try {
     const r = await fetch(`${PRESTA_API_URL.replace('/api','')}/headless/checkout/init?ws_key=${PRESTA_API_KEY}&id_lang=${idLang}`, { cache: 'no-store' });
     const data = await r.json();
+    // URL CMS native (CGV) résolue côté serveur (fallback cmsUrl côté client).
+    if (r.ok && data?.cgv?.id_cms) {
+      const map = await resolveUrls([{ type: 'cms', id: Number(data.cgv.id_cms) }], idLang);
+      const resolved = map.get(`cms:${Number(data.cgv.id_cms)}`);
+      if (resolved) data.cgv.url = resolved;
+    }
     return NextResponse.json(data, { status: r.status });
   } catch (e: any) {
     return NextResponse.json({ error: 'Proxy error', detail: e.message }, { status: 500 });

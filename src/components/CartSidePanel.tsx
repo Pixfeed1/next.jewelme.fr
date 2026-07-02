@@ -89,7 +89,7 @@ export default function CartSidePanel() {
                   )}
 
                   <div style={{ minWidth: 0 }}>
-                    <a href={productUrl({ id: item.id_product, linkRewrite: item.link_rewrite }, locale)} onClick={closePanel}
+                    <a href={item.url ?? productUrl({ id: item.id_product, linkRewrite: item.link_rewrite }, locale)} onClick={closePanel}
                       style={{ fontSize: 13, color: '#666', textDecoration: 'none', lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {item.name}
                     </a>

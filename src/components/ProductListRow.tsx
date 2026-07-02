@@ -15,7 +15,7 @@ export default function ProductListRow({ product }: Props) {
   const imageUrl = product.idDefaultImage
     ? getProductImageUrl(product.id, product.idDefaultImage)
     : '';
-  const productLink = productUrl(product, locale);
+  const productLink = product.url ?? productUrl(product, locale);
   return (
     <article style={{ display: 'grid', gridTemplateColumns: '120px 1fr auto', gap: 16, padding: 12, background: '#fff', border: '1px solid var(--or-grey-lighter)', borderRadius: 4, alignItems: 'center' }}>
       <Link href={productLink} style={{ position: 'relative', display: 'block', width: 120, height: 120, background: 'var(--or-bg-soft)' }}>

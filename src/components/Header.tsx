@@ -162,7 +162,7 @@ function renderMenuItem(entry: MegaMenuEntry, locale: string) {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column' }}>
             {allCategories.map((cat) => (
               <li key={'c-' + cat.id}>
-                <Link href={categoryUrl({ id: cat.id, linkRewrite: (cat as any).link_rewrite || cat.name }, locale)}
+                <Link href={cat.url ? mapPrestaUrl(cat.url, locale) : categoryUrl({ id: cat.id, linkRewrite: (cat as any).link_rewrite || cat.name }, locale)}
                       style={{ display: 'block', padding: '10px 16px', color: 'var(--or-text)', textDecoration: 'none', fontSize: 13, fontWeight: 500, borderBottom: '1px solid var(--or-bg-soft)' }}>
                   {cat.name}
                 </Link>
@@ -174,7 +174,7 @@ function renderMenuItem(entry: MegaMenuEntry, locale: string) {
           <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column' }}>
             {allManufacturers.map((m) => (
               <li key={'m-' + m.id}>
-                <Link href={manufacturerUrl({ id: m.id, name: m.name, linkRewrite: (m as any).link_rewrite }, locale)}
+                <Link href={m.url ? mapPrestaUrl(m.url, locale) : manufacturerUrl({ id: m.id, name: m.name, linkRewrite: (m as any).link_rewrite }, locale)}
                       style={{ display: 'block', padding: '10px 16px', color: 'var(--or-text)', textDecoration: 'none', fontSize: 13, fontWeight: 500, borderBottom: '1px solid var(--or-bg-soft)' }}>
                   {m.name}
                 </Link>

@@ -15,6 +15,8 @@ export interface CartItem {
   total_wt: number;
   attributes: string;
   link_rewrite: string;
+  /** URL produit native Presta (résolue côté serveur dans /api/cart*). */
+  url?: string;
   image_id: number | null;
   in_stock?: boolean;
   /** stock disponible (rempli par /api/cart*) pour borner la quantité */

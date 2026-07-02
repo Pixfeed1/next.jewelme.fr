@@ -2,7 +2,8 @@ import { fetchCmsById, getCmsValue, type CmsPage } from '@/lib/cms';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import PowerfulForm from '@/components/PowerfulForm';
-import { cmsUrl, homeUrl } from '@/lib/url-builder';
+import { cmsUrl, homeUrl, idLangFromLocale } from '@/lib/url-builder';
+import { resolveUrls } from '@/lib/resolve-urls';
 import type { Metadata } from 'next';
 
 function slugFor(page: CmsPage, locale: string): string {
@@ -15,11 +16,12 @@ export async function cmsMetadata(id: number, locale: string): Promise<Metadata>
   if (!page) return {};
   const cmsFr = { id: page.id, slug: slugFor(page, 'fr') };
   const cmsEn = { id: page.id, slug: slugFor(page, 'en') };
+  const resolvedMeta = await resolveUrls([{ type: 'cms', id: page.id }], idLangFromLocale(locale));
   return {
     title: getCmsValue(page, 'metaTitle', locale) || getCmsValue(page, 'title', locale) || 'Page',
     description: getCmsValue(page, 'metaDescription', locale) || '',
     alternates: {
-      canonical: cmsUrl(locale === 'en' ? cmsEn : cmsFr, locale),
+      canonical: resolvedMeta.get(`cms:${page.id}`) ?? cmsUrl(locale === 'en' ? cmsEn : cmsFr, locale),
       languages: { fr: cmsUrl(cmsFr, 'fr'), en: cmsUrl(cmsEn, 'en'), 'x-default': cmsUrl(cmsFr, 'fr') },
     },
   };

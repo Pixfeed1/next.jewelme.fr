@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
+import { enrichCartWithUrls } from '@/lib/cart-urls';
 const PRESTA_API_URL = process.env.PRESTA_API_URL || 'https://www.onlyroots-reggae.com';
 const PRESTA_API_KEY = process.env.PRESTA_API_KEY || 'FHREYMY1XYM8UBZW2EIJ7WUQWT36TBQG';
 
@@ -16,6 +17,7 @@ export async function POST(req: NextRequest) {
       cache: 'no-store',
     });
     const data = await r.json();
+    if (r.ok && data?.cart) data.cart = await enrichCartWithUrls(data.cart, idLang);
     return NextResponse.json(data, { status: r.status });
   } catch (e: any) {
     return NextResponse.json({ error: 'Proxy error', detail: e.message }, { status: 500 });
