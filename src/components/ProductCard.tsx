@@ -17,7 +17,7 @@ export default function ProductCard({ product }: Props) {
   const imageUrl = product.idDefaultImage
     ? getProductImageUrl(product.id, product.idDefaultImage)
     : '';
-  const productLink = productUrl(product, locale);
+  const productLink = product.url ?? productUrl(product, locale);
 
   return (
     <article className="product-card" style={{ background: '#fff', border: 'none', borderRadius: 6, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column' }}>

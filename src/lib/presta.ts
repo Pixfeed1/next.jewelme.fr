@@ -5,6 +5,7 @@
  */
 
 import { decodeHtmlEntities } from './text-utils';
+import { resolveUrls } from './resolve-urls';
 
 const API_URL = process.env.PRESTA_API_URL || 'https://test4.jewelme.fr/api';
 const API_KEY = process.env.PRESTA_API_KEY || '5KC84V1MI8YJR54U4HSZWFK4IQG2RS28';
@@ -60,6 +61,8 @@ export interface PrestaProduct {
   linkRewrite: string;
   /** link_rewrite de la catégorie par défaut — segment SEO de l'URL produit Presta */
   categorySlug: string;
+  /** URL canonique PrestaShop (chemin relatif), résolue via resolve_urls du module */
+  url?: string;
   quantity: number;
   metaTitle: string;
   metaDescription: string;
@@ -381,7 +384,9 @@ async function withCategorySlugs(products: PrestaProduct[], language = 1): Promi
     products.map((p) => p.idCategoryDefault),
     language
   );
-  return products.map((p) => ({ ...p, categorySlug: slugMap[p.idCategoryDefault] ?? '' }));
+  const withSlugs = products.map((p) => ({ ...p, categorySlug: slugMap[p.idCategoryDefault] ?? '' }));
+  const urlMap = await resolveUrls(withSlugs.map((p) => ({ type: 'product', id: p.id })), language);
+  return withSlugs.map((p) => ({ ...p, url: urlMap.get(`product:${p.id}`) }));
 }
 
 export function getProductImageUrl(idProduct: number, idImage: number): string {

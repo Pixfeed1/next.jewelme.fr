@@ -111,3 +111,4 @@ export async function fetchCrossSell(idProduct: number): Promise<CrossSellLists>
   }
 }
 
+
