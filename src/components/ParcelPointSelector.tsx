@@ -113,6 +113,7 @@ export default function ParcelPointSelector({
       background: '#f9f7f0',
       border: '1px solid #e5e0d6',
       borderRadius: 4,
+      maxWidth: '100%',
     }}>
       <div style={{ marginBottom: 12 }}>
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>
@@ -127,6 +128,7 @@ export default function ParcelPointSelector({
             placeholder="Code postal"
             style={{
               flex: 1,
+              minWidth: 0,
               padding: '8px 12px',
               border: '1px solid #d8d8d8',
               borderRadius: 4,
@@ -137,6 +139,8 @@ export default function ParcelPointSelector({
             type="button"
             onClick={handleSearch}
             style={{
+              flexShrink: 0,
+              whiteSpace: 'nowrap',
               padding: '8px 16px',
               background: '#a3a2a2',
               color: 'white',
@@ -173,6 +177,8 @@ export default function ParcelPointSelector({
                 onClick={() => onSelect(entry)}
                 style={{
                   display: 'block',
+                  width: '100%',
+                  maxWidth: '100%',
                   textAlign: 'left',
                   padding: 12,
                   background: selected ? '#f0f7f2' : '#fff',
@@ -180,13 +186,14 @@ export default function ParcelPointSelector({
                   borderRadius: 4,
                   cursor: 'pointer',
                   fontSize: 13,
+                  overflowWrap: 'anywhere',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-                  <div style={{ fontWeight: 600 }}>{p.name}</div>
-                  {dist && <div style={{ fontSize: 12, color: '#888' }}>{dist}</div>}
+                  <div style={{ fontWeight: 600, minWidth: 0, overflowWrap: 'anywhere' }}>{p.name}</div>
+                  {dist && <div style={{ fontSize: 12, color: '#888', flexShrink: 0 }}>{dist}</div>}
                 </div>
-                <div style={{ color: '#555', marginTop: 4 }}>
+                <div style={{ color: '#555', marginTop: 4, overflowWrap: 'anywhere' }}>
                   {p.location.street}, {p.location.zipCode} {p.location.city}
                 </div>
                 {hours && (

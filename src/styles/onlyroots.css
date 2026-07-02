@@ -857,6 +857,11 @@ body { overflow-x: clip; max-width: 100%; }
    peut plus scroller). */
 .category-layout > * { min-width: 0; }
 
+/* Meme protection anti-blowout pour le tunnel de commande : sans min-width:0
+   la colonne 1fr (formulaire + recapitulatif <aside>) s'etire a la largeur
+   intrinseque du contenu (points relais, montants) et depasse l'ecran mobile. */
+.checkout-layout > * { min-width: 0; }
+
 /* Sur petits ecrans (telephones) la vue liste/tableau n'a pas d'interet et
    debordait : on masque le selecteur de vue et on ne garde que les vignettes
    (la grille est la vue par defaut). */
