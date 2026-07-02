@@ -646,7 +646,7 @@ a { color: inherit; }
 /* ============ Panier responsive ============ */
 @media (max-width: 768px) {
   .cart-item-row {
-    grid-template-columns: 60px 1fr !important;
+    grid-template-columns: 80px 1fr !important;
     gap: 8px !important;
     row-gap: 6px !important;
     padding: 12px 0 !important;
@@ -663,7 +663,7 @@ a { color: inherit; }
 /* ============ Panier responsive ============ */
 @media (max-width: 768px) {
   .cart-item-row {
-    grid-template-columns: 60px 1fr !important;
+    grid-template-columns: 80px 1fr !important;
     gap: 8px !important;
     row-gap: 6px !important;
     padding: 12px 0 !important;
