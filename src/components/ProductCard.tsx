@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { useState } from 'react';
 import { PrestaProduct, getProductImageUrl } from '@/lib/presta';
 import { productUrl } from '@/lib/url-builder';
 import { useLocale } from '@/lib/locale-context';
@@ -7,6 +8,7 @@ import ProductPlayButton from './ProductPlayButton';
 import ProductBadges from './ProductBadges';
 import ProductCardCartButton from './ProductCardCartButton';
 import ProductPrice from './ProductPrice';
+import ProductQuickView from './ProductQuickView';
 
 interface Props {
   product: PrestaProduct;
@@ -14,6 +16,7 @@ interface Props {
 
 export default function ProductCard({ product }: Props) {
   const { locale } = useLocale();
+  const [qvOpen, setQvOpen] = useState(false);
   const imageUrl = product.idDefaultImage
     ? getProductImageUrl(product.id, product.idDefaultImage)
     : '';
@@ -39,13 +42,21 @@ export default function ProductCard({ product }: Props) {
             />
           ) : null}
         </Link>
-        <div className="product-card-hover-eye" aria-hidden="true">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7z" fill="#fff" stroke="#3f6e51" strokeWidth="2" strokeLinejoin="round"/>
-            <circle cx="12" cy="12" r="4.5" fill="#3f6e51"/>
-            <circle cx="10.4" cy="11.6" r="1.8" fill="#fff" opacity="0.95"/>
-            <circle cx="11.4" cy="12.4" r="1.8" fill="#3f6e51"/>
-          </svg>
+        <div className="product-card-hover-eye">
+          <button
+            type="button"
+            className="product-card-eye-btn"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQvOpen(true); }}
+            aria-label={locale === 'en' ? 'Quick view' : 'Aperçu rapide'}
+            title={locale === 'en' ? 'Quick view' : 'Aperçu rapide'}
+          >
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 5C5 5 1 12 1 12s4 7 11 7 11-7 11-7-4-7-11-7z" fill="#fff" stroke="#3f6e51" strokeWidth="2" strokeLinejoin="round"/>
+              <circle cx="12" cy="12" r="4.5" fill="#3f6e51"/>
+              <circle cx="10.4" cy="11.6" r="1.8" fill="#fff" opacity="0.95"/>
+              <circle cx="11.4" cy="12.4" r="1.8" fill="#3f6e51"/>
+            </svg>
+          </button>
         </div>
         <ProductBadges product={product} />
       </div>
@@ -79,6 +90,8 @@ export default function ProductCard({ product }: Props) {
         />
         <ProductCardCartButton idProduct={product.id} name={product.name} price={product.price} quantity={product.quantity} />
       </div>
+
+      <ProductQuickView product={product} open={qvOpen} onClose={() => setQvOpen(false)} />
     </article>
   );
 }

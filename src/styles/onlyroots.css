@@ -123,6 +123,51 @@ a { color: inherit; }
 .product-card:hover .product-card-hover-eye { opacity: 1; }
 .product-card:hover .product-card-hover-eye svg { transform: scale(1); }
 
+/* Bouton oeil = quickview. Seule l'icone est cliquable (le reste de l'image
+   garde le lien produit). Cliquable uniquement au survol (icone visible). */
+.product-card-eye-btn {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; margin: 0; border: 0; background: none;
+  cursor: pointer; pointer-events: none;
+}
+.product-card:hover .product-card-eye-btn { pointer-events: auto; }
+
+/* Desktop / grandes tablettes uniquement : sous 1024px, pas d'oeil ni de
+   quickview (le survol n'a pas de sens en tactile ; clic carte -> fiche). */
+@media (max-width: 1023px) {
+  .product-card-hover-eye { display: none !important; }
+}
+
+/* ============ Quickview produit (modal) ============ */
+.product-quickview-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  z-index: 10001; display: flex; align-items: center; justify-content: center;
+  padding: 24px; animation: orFadeIn 0.2s ease;
+}
+.product-quickview-card {
+  position: relative; background: #fff; border-radius: 6px;
+  width: 100%; max-width: 820px; max-height: 90vh; overflow-y: auto;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3); animation: orPopIn 0.25s ease;
+}
+.product-quickview-media {
+  background: var(--or-bg-soft); display: flex; align-items: center;
+  justify-content: center; padding: 24px; min-height: 320px;
+}
+.product-quickview-body { padding: 28px; min-width: 0; }
+.product-quickview-close {
+  position: absolute; top: 10px; right: 10px; z-index: 2;
+  background: rgba(255,255,255,0.92); border: 0; border-radius: 50%;
+  width: 36px; height: 36px; display: flex; align-items: center;
+  justify-content: center; cursor: pointer; color: #333;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.product-quickview-close:hover { background: #f0f0f0; }
+@media (max-width: 700px) {
+  .product-quickview-card { grid-template-columns: 1fr; }
+  .product-quickview-media { min-height: 200px; }
+}
+
 
 /* Anti-FOUC Swiper : cache le carousel jusqu'a init, puis fade-in */
 .product-carousel .swiper {
