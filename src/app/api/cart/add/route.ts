@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
   const idLang = locale === 'en' ? 2 : 1;
   try {
     const body = await req.json();
+    body.customer_token = cookieStore.get('pixfeed_auth')?.value || '';
     const res = await fetch(`${BASE}/headless/cart/add?id_lang=${idLang}`, {
       method: 'POST',
       headers: { 'X-Ws-Key': PRESTA_API_KEY, 'Content-Type': 'application/json' },

@@ -27,7 +27,7 @@ export function CustomerPricesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const { cart } = useCart();
   const token = cart?.token || '';
-  const enabled = !!user && !!token;
+  const enabled = !!user;
 
   const [prices, setPrices] = useState<Record<number, PriceEntry>>({});
   const [displayHt, setDisplayHt] = useState(false);
@@ -38,7 +38,7 @@ export function CustomerPricesProvider({ children }: { children: ReactNode }) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const flush = useCallback(async () => {
-    if (!user || !token) return;
+    if (!user) return;
     const ids = Array.from(pendingRef.current).filter((id) => !fetchedRef.current.has(id));
     pendingRef.current.clear();
     if (ids.length === 0) return;

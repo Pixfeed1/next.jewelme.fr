@@ -25,7 +25,7 @@ export default function CartSidePanel() {
 
   const fmt = (n: number) => n.toFixed(2).replace('.', ',') + '\u00a0' + (cart?.currency?.symbol ?? '€');
   const displayHt = cart?.totals?.display_ht ?? false;
-  const tax = cart ? (cart.totals.total - (cart.totals.subtotal ?? 0)) : 0;
+  const tax = (cart?.totals as { tax?: number } | undefined)?.tax ?? 0;
   const itemCount = cart?.item_count ?? 0;
 
   return (
@@ -94,7 +94,7 @@ export default function CartSidePanel() {
                       {item.name}
                     </a>
                     <div style={{ marginTop: 6, fontSize: 15, fontWeight: 700, color: '#bf1212' }}>
-                      {fmt(item.total_wt / item.quantity)} <span style={{ color: '#666', fontSize: 13, fontWeight: 400 }}>x {item.quantity}</span>
+                      {fmt((displayHt ? ((item as unknown as { total?: number }).total ?? item.total_wt) : item.total_wt) / item.quantity)}{displayHt ? ' HT' : ''} <span style={{ color: '#666', fontSize: 13, fontWeight: 400 }}>x {item.quantity}</span>
                     </div>
                   </div>
 
@@ -117,19 +117,25 @@ export default function CartSidePanel() {
         {cart && cart.items.length > 0 && (
           <div style={{ padding: '16px', borderTop: '1px solid #e5e0d6', background: '#f5f0e8' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
-              <span style={{ color: '#666' }}>{t('subtotal')}</span>
+              <span style={{ color: '#666' }}>{t('subtotal')}{displayHt ? ' HT' : ''}</span>
               <span style={{ color: '#333' }}>{fmt(displayHt ? (cart.totals.subtotal ?? 0) : (cart.totals.subtotal_wt ?? 0))}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
-              <span style={{ color: '#666' }}>Livraison</span>
-              <span style={{ color: '#333' }}>{fmt(cart.totals.shipping)}</span>
+              <span style={{ color: '#666' }}>Livraison{displayHt ? ' HT' : ''}</span>
+              <span style={{ color: '#333' }}>{fmt(displayHt ? ((cart.totals as { shipping_ht?: number }).shipping_ht ?? cart.totals.shipping) : cart.totals.shipping)}</span>
             </div>
+            {displayHt && tax > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
+                <span style={{ color: '#666' }}>TVA</span>
+                <span style={{ color: '#333' }}>{fmt(tax)}</span>
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, fontWeight: 700, padding: '8px 0 4px', borderTop: '1px solid #e5e0d6', marginTop: 4 }}>
-              <span>{displayHt ? 'Total HT' : t('total_ttc')}</span>
+              <span>{t('total_ttc')}</span>
               <span>{fmt(cart.totals.total)}</span>
             </div>
             <div style={{ textAlign: 'right', fontSize: 11, color: '#888', fontStyle: 'italic', marginBottom: 14 }}>
-              {displayHt ? `TVA : ${fmt(tax)}` : `TVA incluse plus frais d'envoi : ${fmt(tax)}`}
+              {(!displayHt && tax > 0) ? `TVA incluse : ${fmt(tax)}` : ''}
             </div>
 
             <a href={localeHref('/panier', locale)} onClick={closePanel}

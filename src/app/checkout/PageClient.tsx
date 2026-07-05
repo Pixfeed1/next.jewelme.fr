@@ -70,6 +70,7 @@ export default function CheckoutPage() {
       quantity: parseInt(String(it.quantity ?? 1), 10),
     }));
     const value = parseFloat(String(cart.totals?.total ?? 0));
+    void 0;
     trackBeginCheckout(items, value);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -509,13 +510,13 @@ export default function CheckoutPage() {
                 <div style={{ fontSize: 12, lineHeight: 1.3, color: '#555', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                   {item.name}<br /><span style={{ color: '#999' }}>x {item.quantity}</span>
                 </div>
-                <strong style={{ fontSize: 12, color: '#333', textAlign: 'right' }}>{fmt(item.total_wt)}</strong>
+                <strong style={{ fontSize: 12, color: '#333', textAlign: 'right' }}>{fmt((cart.totals as { display_ht?: boolean }).display_ht ? ((item as unknown as { total?: number }).total ?? item.total_wt) : item.total_wt)}{(cart.totals as { display_ht?: boolean }).display_ht ? ' HT' : ''}</strong>
               </div>
             ))}
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
-            <span style={{ color: '#666' }}>{t('subtotal')}</span><span>{fmt(cart.totals.subtotal ?? 0)}</span>
+            <span style={{ color: '#666' }}>{t('subtotal')}{(cart.totals as { display_ht?: boolean }).display_ht ? ' HT' : ''}</span><span>{fmt((cart.totals as { display_ht?: boolean }).display_ht ? (cart.totals.subtotal ?? 0) : ((cart.totals as { subtotal_wt?: number }).subtotal_wt ?? cart.totals.subtotal ?? 0))}</span>
           </div>
           {cart.totals.discounts && cart.totals.discounts > 0 ? (
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0', color: '#3f6e51' }}>
@@ -529,8 +530,9 @@ export default function CheckoutPage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, fontWeight: 700, marginTop: 8, paddingTop: 12, borderTop: '1px solid #e5e0d6' }}>
             <span>{t('total_ttc')}</span>
             <span style={{ color: '#bf1212' }}>{fmt(
-              (cart.totals.subtotal ?? 0)
+              ((cart.totals as { subtotal_wt?: number }).subtotal_wt ?? cart.totals.subtotal ?? 0)
               + (idCarrier !== null && carriers.find(c => c.id === idCarrier) ? carriers.find(c => c.id === idCarrier)!.price : cart.totals.shipping)
+              - (cart.totals.discounts ?? 0)
             )}</span>
           </div>
         </aside>

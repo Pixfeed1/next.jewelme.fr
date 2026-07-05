@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useLocale } from '@/lib/locale-context';
 import { useState } from 'react';
 import { useCart } from '@/lib/cart-context';
+import { useAuth } from '@/lib/auth-context';
 import { useT } from '@/lib/i18n';
 import { getProductImageUrl } from '@/lib/presta';
 import { homeUrl, localeHref, productUrl } from '@/lib/url-builder';
@@ -12,6 +13,7 @@ export default function CartPage() {
   const { locale } = useLocale();
   const t = useT();
   const { cart, updateItem, removeItem } = useCart();
+  const { user } = useAuth();
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [maxReachedKey, setMaxReachedKey] = useState<string | null>(null);
 
@@ -48,7 +50,8 @@ export default function CartPage() {
     await removeItem(id_product, id_attr);
     setPendingId(null);
   };
-  const tax = cart ? (cart.totals.total - (cart.totals.subtotal ?? 0)) : 0;
+  const displayHt = cart?.totals?.display_ht ?? false;
+  const tax = (cart?.totals as { tax?: number } | undefined)?.tax ?? 0;
   const itemCount = cart?.item_count ?? 0;
   const shippingFree = cart && cart.totals.shipping === 0;
 
@@ -90,7 +93,7 @@ export default function CartPage() {
                     {item.name}
                   </Link>
                   <div style={{ marginTop: 6, fontSize: 14, fontWeight: 700, color: '#333' }}>
-                    {fmt(item.price_wt)}
+                    {fmt(displayHt ? ((item as unknown as { price?: number }).price ?? item.price_wt) : item.price_wt)}{displayHt ? ' HT' : ''}
                   </div>
                 </div>
                 {(() => {
@@ -129,7 +132,7 @@ export default function CartPage() {
                   <i className="material-icons" style={{ fontSize: 20 }}>delete_outline</i>
                 </button>
                 <strong style={{ fontSize: 14, color: '#333', textAlign: 'right', fontWeight: 700 }}>
-                  {fmt(item.total_wt)}
+                  {fmt(displayHt ? ((item as unknown as { total?: number }).total ?? item.total_wt) : item.total_wt)}{displayHt ? ' HT' : ''}
                 </strong>
               </div>
             ))}
@@ -155,8 +158,8 @@ export default function CartPage() {
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
-              <span style={{ color: '#666' }}>{t('subtotal')}</span>
-              <span style={{ color: '#333' }}>{fmt(cart.totals.subtotal_wt ?? cart.totals.subtotal ?? 0)}</span>
+              <span style={{ color: '#666' }}>{t('subtotal')}{displayHt ? ' HT' : ''}</span>
+              <span style={{ color: '#333' }}>{fmt(displayHt ? (cart.totals.subtotal ?? 0) : (cart.totals.subtotal_wt ?? 0))}</span>
             </div>
             {cart.totals.discounts && cart.totals.discounts > 0 ? (
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0', color: '#3f6e51' }}>
@@ -164,20 +167,34 @@ export default function CartPage() {
               </div>
             ) : null}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
-              <span style={{ color: '#666' }}>{t('shipping')}</span>
+              <span style={{ color: '#666' }}>{t('shipping')}{displayHt ? ' HT' : ''}</span>
               <span style={{ color: '#333' }}>
-                {shippingFree ? 'gratuit' : fmt(cart.totals.shipping)}
+                {shippingFree ? 'gratuit' : fmt(displayHt ? ((cart.totals as { shipping_ht?: number }).shipping_ht ?? cart.totals.shipping) : cart.totals.shipping)}
               </span>
             </div>
 
+            {displayHt && tax > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
+                <span style={{ color: '#666' }}>TVA</span>
+                <span style={{ color: '#333' }}>{fmt(tax)}</span>
+              </div>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, fontWeight: 700, marginTop: 8, paddingTop: 12, borderTop: '1px solid #d8d0bf' }}>
               <span>{t('total_ttc')}</span>
               <span>{fmt(cart.totals.total)}</span>
             </div>
             <div style={{ textAlign: 'right', fontSize: 12, color: '#888', fontStyle: 'italic', marginTop: 4, marginBottom: 20 }}>
-              {t('tax_included')} : {fmt(tax)}
+              {(!displayHt && tax > 0) ? `${t('tax_included')} : ${fmt(tax)}` : ''}
             </div>
 
+            {user ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+                <Link href={localeHref('/checkout', locale)}
+                  className="btn-commander" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 32px', color: '#fff', textDecoration: 'none', fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', minWidth: 280, justifyContent: 'center' }}>
+                  {locale === 'en' ? 'Checkout' : 'Commander'} <span style={{ fontSize: 16, lineHeight: 1 }}>▸</span>
+                </Link>
+              </div>
+            ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
               {/* 1. Connexion (client existant) — outline principal */}
               <Link href={`${localeHref('/connexion', locale)}?from=${encodeURIComponent(localeHref('/checkout', locale))}`}
@@ -195,6 +212,7 @@ export default function CartPage() {
                 {locale === 'en' ? 'Checkout as guest' : 'Commander en tant qu\'invité'} <span style={{ fontSize: 16, lineHeight: 1 }}>▸</span>
               </Link>
             </div>
+            )}
           </div>
         </>
       )}
