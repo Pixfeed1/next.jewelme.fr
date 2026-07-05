@@ -54,7 +54,7 @@ export function useCustomerAddresses() {
   const reload = useCallback(() => setNonce((n) => n + 1), []);
 
   useEffect(() => {
-    if (!user || !token) {
+    if (!user) {
       setAddresses([]);
       return;
     }
