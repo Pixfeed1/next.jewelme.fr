@@ -77,7 +77,7 @@ export default function ProductCard({ product }: Props) {
         gap: 6,
         background: '#f1f1f1',
       }}>
-        <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--or-text)', margin: 0, flex: 1 }}>
+        <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--or-text)', margin: 0, flex: 1, minWidth: 0 }}>
           <ProductPrice id={product.id} defaultPriceWt={product.priceWt} />
         </p>
         <ProductPlayButton
@@ -85,10 +85,10 @@ export default function ProductCard({ product }: Props) {
           productName={product.name}
           productLink={productLink}
           coverUrl={imageUrl}
-          size={42}
+          size={34}
           variant="inline"
         />
-        <ProductCardCartButton idProduct={product.id} name={product.name} price={product.price} quantity={product.quantity} />
+        <ProductCardCartButton idProduct={product.id} name={product.name} price={product.price} quantity={product.quantity} size={34} />
       </div>
 
       <ProductQuickView product={product} open={qvOpen} onClose={() => setQvOpen(false)} />

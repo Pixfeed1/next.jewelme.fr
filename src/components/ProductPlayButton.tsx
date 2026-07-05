@@ -86,6 +86,7 @@ export default function ProductPlayButton({
   const baseStyle: React.CSSProperties = {
     width: size,
     height: size,
+    flexShrink: 0,
     borderRadius: '50%',
     background: bgColor,
     color: iconColor,

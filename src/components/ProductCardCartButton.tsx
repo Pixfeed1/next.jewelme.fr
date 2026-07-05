@@ -9,9 +9,10 @@ interface Props {
   name?: string;
   price?: number;
   quantity?: number;
+  size?: number;
 }
 
-export default function ProductCardCartButton({ idProduct, name, price, quantity = 1 }: Props) {
+export default function ProductCardCartButton({ idProduct, name, price, quantity = 1, size = 42 }: Props) {
   const outOfStock = quantity <= 0;
   const { addItem } = useCart();
   const t = useT();
@@ -43,7 +44,7 @@ export default function ProductCardCartButton({ idProduct, name, price, quantity
       aria-label={outOfStock ? t('out_of_stock') : t('add_to_cart')}
       title={outOfStock ? t('out_of_stock') : t('add_to_cart')}
       style={{
-        width: 42, height: 42,
+        width: size, height: size, flexShrink: 0,
         color: '#fff',
         border: 'none',
         borderRadius: 6,
