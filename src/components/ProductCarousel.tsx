@@ -45,26 +45,33 @@ export default function ProductCarousel({ products, config, continuous = false }
   if (products.length === 0) return null;
   const cols = Math.max(1, config.columns_desktop || 6);
   const canLoop = products.length > cols;
+  const runContinuous = continuous && products.length > cols;
+
+  const showArrows = runContinuous || canLoop;
 
   return (
     <div className="product-carousel">
-      <button type="button" className="slick-prev" aria-label="Précédent" onClick={() => swiperRef.current?.slidePrev()}>
-        <ChevronLeft />
-      </button>
-      <button type="button" className="slick-next" aria-label="Suivant" onClick={() => swiperRef.current?.slideNext()}>
-        <ChevronRight />
-      </button>
+      {showArrows && (
+        <>
+          <button type="button" className="slick-prev" aria-label="Précédent" onClick={() => swiperRef.current?.slidePrev()}>
+            <ChevronLeft />
+          </button>
+          <button type="button" className="slick-next" aria-label="Suivant" onClick={() => swiperRef.current?.slideNext()}>
+            <ChevronRight />
+          </button>
+        </>
+      )}
       <Swiper
-        modules={(continuous || config.autoplay) ? [Autoplay, FreeMode] : []}
+        modules={(runContinuous || config.autoplay) ? [Autoplay, FreeMode] : []}
         onSwiper={(s) => { swiperRef.current = s; }}
         slidesPerView={2}
-        slidesPerGroup={continuous ? 1 : 2}
+        slidesPerGroup={runContinuous ? 1 : 2}
         spaceBetween={8}
-        loop={continuous ? true : canLoop}
-        freeMode={continuous ? { enabled: true, momentum: false } : false}
-        speed={continuous ? 4000 : 1200}
+        loop={runContinuous ? true : canLoop}
+        freeMode={runContinuous ? { enabled: true, momentum: false } : false}
+        speed={runContinuous ? 4000 : 1200}
         autoplay={
-          continuous
+          runContinuous
             ? { delay: 0, disableOnInteraction: false, pauseOnMouseEnter: true }
             : config.autoplay
               ? { delay: 3500, disableOnInteraction: false, pauseOnMouseEnter: true }
