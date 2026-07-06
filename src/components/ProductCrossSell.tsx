@@ -3,6 +3,16 @@ import { fetchProductsByIds } from '@/lib/presta';
 import { getServerIdLang } from '@/lib/server-locale';
 import { getServerT } from '@/lib/i18n';
 import ProductCard from './ProductCard';
+import ProductCarousel from './ProductCarousel';
+import type { SliderConfig } from '@/lib/headless-api';
+
+const crossSellSlider: SliderConfig = {
+  enabled: true,
+  autoplay: false,
+  columns_desktop: 6,
+  limit: 12,
+  mobile: { enabled: true, limit: 12 },
+};
 
 interface Props {
   productId: number;
@@ -27,33 +37,20 @@ export default async function ProductCrossSell({ productId }: Props) {
     letterSpacing: '0.05em',
     margin: '0 0 16px',
   };
-  const gridStyle = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(min(165px, 100%), 1fr))',
-    gap: 12,
-  };
 
   return (
     <>
       {boughtProducts.length > 0 && (
         <section style={sectionStyle}>
           <h2 style={titleStyle}>{t('also_bought_title')}</h2>
-          <div style={gridStyle}>
-            {boughtProducts.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
+          <ProductCarousel products={boughtProducts} config={crossSellSlider} />
         </section>
       )}
 
       {categoryProducts.length > 0 && (
         <section style={sectionStyle}>
           <h2 style={titleStyle}>{t('same_category_title')}</h2>
-          <div style={gridStyle}>
-            {categoryProducts.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
+          <ProductCarousel products={categoryProducts} config={crossSellSlider} />
         </section>
       )}
     </>

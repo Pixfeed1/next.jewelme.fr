@@ -129,6 +129,8 @@ export default function CheckoutPage() {
       setEmail(user.email);
       setFirstname(user.firstname);
       setLastname(user.lastname);
+      // Client connecte : l'etape "vos informations" est sautee
+      setStep((s) => (s === 1 ? 2 : s));
     }
   }, [user]);
 
@@ -382,7 +384,7 @@ export default function CheckoutPage() {
               )}
 
               <div style={{ display: 'flex', gap: 12, marginTop: 24, justifyContent: 'space-between' }}>
-                <BackBtn onClick={() => setStep(1)} />
+                {!user && <BackBtn onClick={() => setStep(1)} />}
                 <NextBtn disabled={!validStep2} onClick={() => setStep(3)} />
               </div>
             </section>
