@@ -43,14 +43,14 @@ export default async function ProductCrossSell({ productId }: Props) {
       {boughtProducts.length > 0 && (
         <section style={sectionStyle}>
           <h2 style={titleStyle}>{t('also_bought_title')}</h2>
-          <ProductCarousel products={boughtProducts} config={crossSellSlider} />
+          <ProductCarousel products={boughtProducts} config={crossSellSlider} continuous />
         </section>
       )}
 
       {categoryProducts.length > 0 && (
         <section style={sectionStyle}>
           <h2 style={titleStyle}>{t('same_category_title')}</h2>
-          <ProductCarousel products={categoryProducts} config={crossSellSlider} />
+          <ProductCarousel products={categoryProducts} config={crossSellSlider} continuous />
         </section>
       )}
     </>

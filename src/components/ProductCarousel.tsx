@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay } from 'swiper/modules';
+import { Autoplay, FreeMode } from 'swiper/modules';
 import type { Swiper as SwiperType } from 'swiper';
 import 'swiper/css';
 
@@ -13,6 +13,7 @@ import ProductCard from './ProductCard';
 interface Props {
   products: PrestaProduct[];
   config: SliderConfig;
+  continuous?: boolean;
 }
 
 function deriveBreakpoints(c: number) {
@@ -39,7 +40,7 @@ const ChevronRight = () => (
   </svg>
 );
 
-export default function ProductCarousel({ products, config }: Props) {
+export default function ProductCarousel({ products, config, continuous = false }: Props) {
   const swiperRef = useRef<SwiperType | null>(null);
   if (products.length === 0) return null;
   const cols = Math.max(1, config.columns_desktop || 6);
@@ -54,17 +55,20 @@ export default function ProductCarousel({ products, config }: Props) {
         <ChevronRight />
       </button>
       <Swiper
-        modules={config.autoplay ? [Autoplay] : []}
+        modules={(continuous || config.autoplay) ? [Autoplay, FreeMode] : []}
         onSwiper={(s) => { swiperRef.current = s; }}
         slidesPerView={2}
-        slidesPerGroup={2}
+        slidesPerGroup={continuous ? 1 : 2}
         spaceBetween={8}
-        loop={canLoop}
-        speed={1200}
+        loop={continuous ? true : canLoop}
+        freeMode={continuous ? { enabled: true, momentum: false } : false}
+        speed={continuous ? 4000 : 1200}
         autoplay={
-          config.autoplay
-            ? { delay: 3500, disableOnInteraction: false, pauseOnMouseEnter: true }
-            : false
+          continuous
+            ? { delay: 0, disableOnInteraction: false, pauseOnMouseEnter: true }
+            : config.autoplay
+              ? { delay: 3500, disableOnInteraction: false, pauseOnMouseEnter: true }
+              : false
         }
         breakpoints={deriveBreakpoints(cols)}
       >
