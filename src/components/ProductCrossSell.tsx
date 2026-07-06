@@ -8,7 +8,7 @@ import type { SliderConfig } from '@/lib/headless-api';
 
 const crossSellSlider: SliderConfig = {
   enabled: true,
-  autoplay: false,
+  autoplay: true,
   columns_desktop: 6,
   limit: 12,
   mobile: { enabled: true, limit: 12 },
@@ -43,14 +43,14 @@ export default async function ProductCrossSell({ productId }: Props) {
       {boughtProducts.length > 0 && (
         <section style={sectionStyle}>
           <h2 style={titleStyle}>{t('also_bought_title')}</h2>
-          <ProductCarousel products={boughtProducts} config={crossSellSlider} continuous />
+          <ProductCarousel products={boughtProducts} config={crossSellSlider} />
         </section>
       )}
 
       {categoryProducts.length > 0 && (
         <section style={sectionStyle}>
           <h2 style={titleStyle}>{t('same_category_title')}</h2>
-          <ProductCarousel products={categoryProducts} config={crossSellSlider} continuous />
+          <ProductCarousel products={categoryProducts} config={crossSellSlider} />
         </section>
       )}
     </>
