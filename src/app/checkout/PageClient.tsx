@@ -19,7 +19,7 @@ const PAYBOX_ID = 'paybox';
 
 interface Country { id: number; iso: string; name: string; need_zip_code: boolean; zip_format: string; contains_states: boolean; }
 interface PaymentMethod { id: string; name: string; label: string; instructions: string; }
-interface Carrier { id: number; name: string; delay: string; price: number; price_str: string; logo: string | null; is_free: boolean; is_parcel_point?: boolean; networks?: string[]; }
+interface Carrier { id: number; name: string; delay: string; price: number; price_ht?: number; price_str: string; logo: string | null; is_free: boolean; is_parcel_point?: boolean; networks?: string[]; }
 interface InitData { countries: Country[]; payment_methods: PaymentMethod[]; cgv: { id_cms: number; slug: string; title: string; url?: string } | null; default_country: number; }
 
 type Step = 1 | 2 | 3 | 4;
@@ -414,7 +414,7 @@ export default function CheckoutPage() {
                           <div style={{ fontWeight: 600, fontSize: 14 }}>{c.name}</div>
                           {c.delay && <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{c.delay}</div>}
                         </div>
-                        <strong style={{ color: '#666' }}>{c.price_str}</strong>
+                        <strong style={{ color: '#666' }}>{(cart?.totals as { display_ht?: boolean } | undefined)?.display_ht ? ((c.price_ht ?? c.price).toFixed(2).replace('.', ',') + '\u00a0€ HT') : c.price_str}</strong>
                       </label>
                       {idCarrier === c.id && c.is_parcel_point && (
                         <ParcelPointSelector
@@ -524,8 +524,8 @@ export default function CheckoutPage() {
             </div>
           ) : null}
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
-            <span style={{ color: '#666' }}>{t('shipping')}</span>
-            <span>{idCarrier !== null && carriers.find(c => c.id === idCarrier) ? fmt(carriers.find(c => c.id === idCarrier)!.price) : fmt(cart.totals.shipping)}</span>
+            <span style={{ color: '#666' }}>{t('shipping')}{(cart.totals as { display_ht?: boolean }).display_ht ? ' HT' : ''}</span>
+            <span>{(() => { const ht = (cart.totals as { display_ht?: boolean }).display_ht; const c = idCarrier !== null ? carriers.find(c => c.id === idCarrier) : undefined; if (c) return fmt(ht ? (c.price_ht ?? c.price) : c.price); return fmt(ht ? ((cart.totals as { shipping_ht?: number }).shipping_ht ?? cart.totals.shipping) : cart.totals.shipping); })()}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, fontWeight: 700, marginTop: 8, paddingTop: 12, borderTop: '1px solid #e5e0d6' }}>
             <span>{t('total_ttc')}</span>

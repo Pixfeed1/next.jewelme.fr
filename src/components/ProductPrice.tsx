@@ -20,9 +20,7 @@ export default function ProductPrice({
   return (
     <span style={{ whiteSpace: 'nowrap' }}>
       {Number(amount).toFixed(2)} €
-      {cp?.isHt ? (
-        <span style={htStyle ?? { fontSize: '0.72em', fontWeight: 600, marginLeft: 4 }}>HT</span>
-      ) : null}
+
     </span>
   );
 }

@@ -124,7 +124,7 @@ export default function CartSidePanel() {
               <span style={{ color: '#666' }}>Livraison{displayHt ? ' HT' : ''}</span>
               <span style={{ color: '#333' }}>{fmt(displayHt ? ((cart.totals as { shipping_ht?: number }).shipping_ht ?? cart.totals.shipping) : cart.totals.shipping)}</span>
             </div>
-            {displayHt && tax > 0 && (
+            {false && (
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
                 <span style={{ color: '#666' }}>TVA</span>
                 <span style={{ color: '#333' }}>{fmt(tax)}</span>

@@ -173,7 +173,7 @@ export default function CartPage() {
               </span>
             </div>
 
-            {displayHt && tax > 0 && (
+            {false && (
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, padding: '4px 0' }}>
                 <span style={{ color: '#666' }}>TVA</span>
                 <span style={{ color: '#333' }}>{fmt(tax)}</span>

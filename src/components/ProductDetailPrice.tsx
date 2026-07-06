@@ -25,7 +25,7 @@ export default function ProductDetailPrice({
     <>
       <p style={{ fontSize: 30, fontWeight: 700, color: 'var(--or-green)', margin: 0, marginBottom: 4 }}>
         {Number(amount).toFixed(2)} €
-        {isHt ? <span style={{ fontSize: 18, marginLeft: 6 }}>HT</span> : null}
+        
       </p>
       <p style={{ fontSize: 12, color: '#888', margin: 0, marginBottom: 24 }}>{subtitle}</p>
     </>
