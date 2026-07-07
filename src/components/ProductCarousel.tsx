@@ -44,10 +44,11 @@ export default function ProductCarousel({ products, config, continuous = false }
   const swiperRef = useRef<SwiperType | null>(null);
   if (products.length === 0) return null;
   const cols = Math.max(1, config.columns_desktop || 6);
-  const canLoop = products.length > cols;
-  const runContinuous = continuous && products.length > cols;
-
-  const showArrows = runContinuous || canLoop;
+  const canScroll = products.length > cols;
+  // Loop Swiper : exige ~2x slidesPerView, sinon slides masquees -> rewind
+  const canLoop = products.length >= cols * 2;
+  const runContinuous = continuous && canScroll;
+  const showArrows = runContinuous || canScroll;
 
   return (
     <div className="product-carousel">
@@ -68,12 +69,13 @@ export default function ProductCarousel({ products, config, continuous = false }
         slidesPerGroup={runContinuous ? 1 : 2}
         spaceBetween={8}
         loop={runContinuous ? true : canLoop}
+        rewind={!runContinuous && !canLoop && canScroll}
         freeMode={runContinuous ? { enabled: true, momentum: false } : false}
         speed={runContinuous ? 4000 : 1200}
         autoplay={
           runContinuous
             ? { delay: 0, disableOnInteraction: false, pauseOnMouseEnter: true }
-            : config.autoplay
+            : config.autoplay && canScroll
               ? { delay: 3500, disableOnInteraction: false, pauseOnMouseEnter: true }
               : false
         }

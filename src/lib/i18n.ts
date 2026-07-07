@@ -23,7 +23,7 @@ export const translations = {
     free: 'gratuit',
     discount: 'Réduction',
     total_ttc: 'Total TTC',
-    tax_included: 'TVA incluse plus frais d\'envoi',
+    tax_included: 'Dont TVA',
     cart_count_singular: 'Il y a 1 article dans votre panier.',
     cart_count_plural: 'Il y a {{n}} articles dans votre panier.',
     // Checkout
@@ -245,7 +245,7 @@ export const translations = {
     free: 'free',
     discount: 'Discount',
     total_ttc: 'Total',
-    tax_included: 'Tax included, shipping fees',
+    tax_included: 'Including VAT',
     cart_count_singular: 'There is 1 item in your cart.',
     cart_count_plural: 'There are {{n}} items in your cart.',
     your_info: 'Your information',
