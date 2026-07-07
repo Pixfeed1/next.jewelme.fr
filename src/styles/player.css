@@ -119,17 +119,19 @@ body.orp-player-active .orp-chat-fab { bottom: 100px; }
     align-self: center;
 }
 
-/* Masquer AGRESSIVEMENT le widget Brevo natif pour liberer les clics */
-#brevo-conversations,
-[id^="brevo-conversations"],
-iframe[id*="brevo"],
-iframe[src*="brevo"],
-iframe[title*="Brevo"],
+/* Widget Brevo natif : ne masquer QUE le launcher (bouton rond natif),
+   la fenetre de conversation ("Brevo live chat") doit rester visible.
+   Conteneur transparent aux clics quand le chat est ferme. */
+#brevo-conversations {
+    pointer-events: none !important;
+}
+#brevo-conversations iframe[title*="live chat"] {
+    pointer-events: auto !important;
+}
+iframe[id*="brevo-conversations-launcher"],
 iframe[title*="hat icon"],
 iframe[title*="hat button"] {
     display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
 }
 
 /* Responsive */
