@@ -64,12 +64,16 @@ body.orp-player-active { padding-bottom: calc(var(--orp-height) + 8px); }
 
 /* Masquer le bouton flottant natif Brevo (au cas ou hideButton API ne marche pas) */
 #brevo-conversations-icon,
-#brevo-conversations > div:first-child:not([class*="window"]):not([class*="chat-window"]),
 iframe[id*="brevo-conversations"][title*="outon"],
 iframe[id*="brevo-conversations"][title*="utton"],
 iframe[id*="brevo-conversations"][title*="hat icon"],
 iframe[id*="brevo-conversations-launcher"] {
     display: none !important;
+}
+/* Le wrapper de la fenetre de chat (nouveau SDK) doit rester affichable */
+#brevo-conversations .brevo-conversations__iframe-wrapper {
+    display: block !important;
+    pointer-events: auto !important;
 }
 
 /* === Bouton chat Brevo flottant et independant du lecteur === */
