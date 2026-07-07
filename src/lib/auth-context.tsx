@@ -85,6 +85,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const d = await res.json();
       if (res.ok && d.success && d.user) {
         setUser(d.user);
+        // Restauration du panier client : si le backend renvoie le token du
+        // dernier panier non commande du client, on l'adopte (parite Presta).
+        if (typeof window !== 'undefined' && d.cart_token) {
+          localStorage.setItem('pixfeed_cart_token', d.cart_token);
+          window.dispatchEvent(new CustomEvent('pixfeed:cart-restored', { detail: d.cart_token }));
+        }
         return { success: true };
       }
       return { success: false, error: d.error || 'invalid' };

@@ -127,6 +127,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     refresh();
   }, [refresh]);
 
+  // Panier restaure au login : adopter le token renvoye par le backend.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onRestored = (e: Event) => {
+      const tok = (e as CustomEvent).detail as string;
+      if (tok) refresh(tok);
+    };
+    window.addEventListener('pixfeed:cart-restored', onRestored);
+    return () => window.removeEventListener('pixfeed:cart-restored', onRestored);
+  }, [refresh]);
+
   // A la deconnexion : on abandonne le panier courant en generant un nouveau
   // token (= panier vide) puis on resynchronise. Le panier ne suit donc pas
   // d'un compte a l'autre sur le meme navigateur.

@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     });
     const data = await r.json();
     if (r.ok && data.success && data.secure_key) {
-      const res = NextResponse.json({ success: true, user: stripUser(data) });
+      const res = NextResponse.json({ success: true, user: stripUser(data), cart_token: data.cart_token ?? null });
       res.cookies.set(AUTH_COOKIE, String(data.secure_key), authCookieOptions);
       return res;
     }
