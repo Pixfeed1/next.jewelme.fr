@@ -27,8 +27,8 @@ export const viewport: Viewport = {
 export async function generateMetadata(): Promise<Metadata> {
   const config = await fetchShopConfig();
   return {
-    title: `${config.shop.name} — Headless POC`,
-    description: 'Démo headless Next.js — POC PixFeed',
+    title: config.shop.name,
+    description: `${config.shop.name} — Disquaire spécialisé reggae : vinyles, CD, nouveautés et rééditions.`,
     icons: config.shop.favicon_url ? [{ rel: 'icon', url: config.shop.favicon_url }] : undefined,
   };
 }

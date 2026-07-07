@@ -147,9 +147,6 @@ export default async function Footer() {
       <div style={{ background: 'var(--or-dark)', color: '#fff', padding: '14px 0' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
           <p style={{ margin: 0, fontSize: 12 }}>© {new Date().getFullYear()} {shop.name} — {t('all_rights_reserved')}</p>
-          <p style={{ margin: 0, fontSize: 11, color: 'var(--or-grey-light)' }}>
-            {t('headless_poc_by')} <a href="https://pixfeed.net" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--or-grey-light)' }}>PixFeed</a>
-          </p>
         </div>
       </div>
     </footer>
