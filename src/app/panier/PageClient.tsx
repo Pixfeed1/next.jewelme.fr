@@ -180,8 +180,8 @@ export default function CartPage() {
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, fontWeight: 700, marginTop: 8, paddingTop: 12, borderTop: '1px solid #d8d0bf' }}>
-              <span>{t('total_ttc')}</span>
-              <span>{fmt(cart.totals.total)}</span>
+              <span>{displayHt ? t('total_ht') : t('total_ttc')}</span>
+              <span>{fmt(displayHt ? ((cart.totals.subtotal ?? 0) + ((cart.totals as { shipping_ht?: number }).shipping_ht ?? cart.totals.shipping ?? 0) - (cart.totals.discounts ?? 0)) : cart.totals.total)}</span>
             </div>
             <div style={{ textAlign: 'right', fontSize: 12, color: '#888', fontStyle: 'italic', marginTop: 4, marginBottom: 20 }}>
               {(!displayHt && tax > 0) ? `${t('tax_included')} : ${fmt(tax)}` : ''}

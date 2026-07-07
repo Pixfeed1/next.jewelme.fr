@@ -530,12 +530,18 @@ export default function CheckoutPage() {
             <span>{(() => { const ht = (cart.totals as { display_ht?: boolean }).display_ht; const c = idCarrier !== null ? carriers.find(c => c.id === idCarrier) : undefined; if (c) return fmt(ht ? (c.price_ht ?? c.price) : c.price); return fmt(ht ? ((cart.totals as { shipping_ht?: number }).shipping_ht ?? cart.totals.shipping) : cart.totals.shipping); })()}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, fontWeight: 700, marginTop: 8, paddingTop: 12, borderTop: '1px solid #e5e0d6' }}>
-            <span>{t('total_ttc')}</span>
-            <span style={{ color: '#bf1212' }}>{fmt(
-              ((cart.totals as { subtotal_wt?: number }).subtotal_wt ?? cart.totals.subtotal ?? 0)
-              + (idCarrier !== null && carriers.find(c => c.id === idCarrier) ? carriers.find(c => c.id === idCarrier)!.price : cart.totals.shipping)
-              - (cart.totals.discounts ?? 0)
-            )}</span>
+            <span>{(cart.totals as { display_ht?: boolean }).display_ht ? t('total_ht') : t('total_ttc')}</span>
+            <span style={{ color: '#bf1212' }}>{fmt((() => {
+              const ht = (cart.totals as { display_ht?: boolean }).display_ht;
+              const c = idCarrier !== null ? carriers.find(k => k.id === idCarrier) : undefined;
+              const ship = c
+                ? (ht ? (c.price_ht ?? c.price) : c.price)
+                : (ht ? ((cart.totals as { shipping_ht?: number }).shipping_ht ?? cart.totals.shipping) : cart.totals.shipping);
+              const sub = ht
+                ? (cart.totals.subtotal ?? 0)
+                : ((cart.totals as { subtotal_wt?: number }).subtotal_wt ?? cart.totals.subtotal ?? 0);
+              return sub + ship - (cart.totals.discounts ?? 0);
+            })())}</span>
           </div>
         </aside>
       </div>

@@ -131,8 +131,8 @@ export default function CartSidePanel() {
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 15, fontWeight: 700, padding: '8px 0 4px', borderTop: '1px solid #e5e0d6', marginTop: 4 }}>
-              <span>{t('total_ttc')}</span>
-              <span>{fmt(cart.totals.total)}</span>
+              <span>{displayHt ? t('total_ht') : t('total_ttc')}</span>
+              <span>{fmt(displayHt ? ((cart.totals.subtotal ?? 0) + ((cart.totals as { shipping_ht?: number }).shipping_ht ?? cart.totals.shipping ?? 0) - (cart.totals.discounts ?? 0)) : cart.totals.total)}</span>
             </div>
             <div style={{ textAlign: 'right', fontSize: 11, color: '#888', fontStyle: 'italic', marginBottom: 14 }}>
               {(!displayHt && tax > 0) ? `TVA incluse : ${fmt(tax)}` : ''}
