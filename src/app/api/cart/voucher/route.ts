@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   const idLang = locale === 'en' ? 2 : 1;
   try {
     const body = await req.json();
-    const r = await fetch(`${PRESTA_API_URL.replace('/api','')}/headless/cart/voucher?id_lang=${idLang}`, {
+    const r = await fetch(`${PRESTA_API_URL.replace(/\/api\/?$/, '')}/headless/cart/voucher?id_lang=${idLang}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Ws-Key': PRESTA_API_KEY },
       body: JSON.stringify(body),

@@ -25,7 +25,7 @@ interface OrderData {
 
 async function fetchOrder(reference: string): Promise<OrderData | null> {
   try {
-    const r = await fetch(`${PRESTA_API_URL.replace('/api','')}/headless/order?reference=${encodeURIComponent(reference)}&ws_key=${PRESTA_API_KEY}`, { cache: 'no-store' });
+    const r = await fetch(`${PRESTA_API_URL.replace(/\/api\/?$/, '')}/headless/order?reference=${encodeURIComponent(reference)}&ws_key=${PRESTA_API_KEY}`, { cache: 'no-store' });
     if (!r.ok) return null;
     const order: OrderData = await r.json();
     for (const it of order.items ?? []) if (it.name) it.name = decodeHtmlEntities(it.name);

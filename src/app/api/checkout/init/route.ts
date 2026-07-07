@@ -9,7 +9,7 @@ export async function GET() {
   const locale = cookieStore.get('locale')?.value;
   const idLang = locale === 'en' ? 2 : 1;
   try {
-    const r = await fetch(`${PRESTA_API_URL.replace('/api','')}/headless/checkout/init?ws_key=${PRESTA_API_KEY}&id_lang=${idLang}`, { cache: 'no-store' });
+    const r = await fetch(`${PRESTA_API_URL.replace(/\/api\/?$/, '')}/headless/checkout/init?ws_key=${PRESTA_API_KEY}&id_lang=${idLang}`, { cache: 'no-store' });
     const data = await r.json();
     // URL CMS native (CGV) résolue côté serveur (fallback cmsUrl côté client).
     if (r.ok && data?.cgv?.id_cms) {

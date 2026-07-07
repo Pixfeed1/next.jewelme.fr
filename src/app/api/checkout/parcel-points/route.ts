@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
     if (city) params.set('city', city);
     if (street) params.set('street', street);
 
-    const url = `${PRESTA_API_URL.replace('/api', '')}/index.php?${params.toString()}`;
+    const url = `${PRESTA_API_URL.replace(/\/api\/?$/, '')}/index.php?${params.toString()}`;
     const r = await fetch(url, { cache: 'no-store' });
     const data = await r.json();
     return NextResponse.json(data, { status: r.status });

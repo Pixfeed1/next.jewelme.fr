@@ -11,7 +11,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ ref
   if (!reference) return NextResponse.json({ error: 'Missing reference' }, { status: 400 });
 
   try {
-    const r = await fetch(`${PRESTA_API_URL.replace('/api','')}/headless/order?reference=${encodeURIComponent(reference)}&ws_key=${PRESTA_API_KEY}&id_lang=${idLang}`, { cache: 'no-store' });
+    const r = await fetch(`${PRESTA_API_URL.replace(/\/api\/?$/, '')}/headless/order?reference=${encodeURIComponent(reference)}&ws_key=${PRESTA_API_KEY}&id_lang=${idLang}`, { cache: 'no-store' });
     const data = await r.json();
     return NextResponse.json(data, { status: r.status });
   } catch (e: any) {

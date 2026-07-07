@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     // rattacher la commande au customer existant côté Presta.
     const secureKey = cookieStore.get('pixfeed_auth')?.value;
     const fwd = secureKey ? { ...body, secure_key: secureKey } : body;
-    const r = await fetch(`${PRESTA_API_URL.replace('/api','')}/headless/checkout/order?id_lang=${idLang}`, {
+    const r = await fetch(`${PRESTA_API_URL.replace(/\/api\/?$/, '')}/headless/checkout/order?id_lang=${idLang}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Ws-Key': PRESTA_API_KEY },
       body: JSON.stringify(fwd),

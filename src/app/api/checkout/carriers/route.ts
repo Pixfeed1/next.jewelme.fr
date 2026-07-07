@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const url = `${PRESTA_API_URL.replace('/api','')}/headless/checkout/carriers?token=${encodeURIComponent(token)}&id_country=${id_country}&postcode=${encodeURIComponent(postcode)}&ws_key=${PRESTA_API_KEY}&id_lang=${idLang}`;
+    const url = `${PRESTA_API_URL.replace(/\/api\/?$/, '')}/headless/checkout/carriers?token=${encodeURIComponent(token)}&id_country=${id_country}&postcode=${encodeURIComponent(postcode)}&ws_key=${PRESTA_API_KEY}&id_lang=${idLang}`;
     const r = await fetch(url, { cache: 'no-store' });
     const data = await r.json();
     return NextResponse.json(data, { status: r.status });
