@@ -39,6 +39,7 @@ export default function BrevoChat() {
         dangerouslySetInnerHTML={{
           __html: `
           (function(d, w) {
+            w.BrevoConversationsSetup = { customWidgetButton: '.orp-chat-fab' };
             w.Brevo = w.Brevo || [];
             w.Brevo.push(['init', { client_key: '${BREVO_CLIENT_KEY}', email_id: '' }]);
             var s = d.createElement('script');
